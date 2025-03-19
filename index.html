@@ -1,0 +1,3228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Phân Đơn</title>
+    <!-- Liên kết các thư viện CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-bottom: 40px; /* Đảm bảo thanh trạng thái không che nội dung */
+        }
+        .header {
+            background-color: #4a6fff;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        .filter-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .order-list {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .service-tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        .badge-waiting {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-processing {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .badge-completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .img-thumbnail-preview {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .img-thumbnail-preview:hover {
+            transform: scale(1.05);
+        }
+        #imagePreviewModal img {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+        .filter-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            background-color: #e9ecef;
+            color: #495057;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        .filter-badge .close {
+            margin-left: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .active-filters {
+            padding: 10px 0;
+        }
+        #statusBar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #343a40;
+            color: white;
+            padding: 5px 15px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        .status-item {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        .success-text {
+            color: #28a745;
+        }
+        .error-text {
+            color: #dc3545;
+        }
+        .warning-text {
+            color: #ffc107;
+        }
+        .debug-panel {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .debug-message {
+            margin-bottom: 5px;
+            border-bottom: 1px dotted #dee2e6;
+            padding-bottom: 3px;
+        }
+        .debug-timestamp {
+            color: #6c757d;
+            font-size: 10px;
+        }
+        /* Thêm hiệu ứng nhấp nháy cho kết quả lọc */
+        @keyframes highlight {
+            0% { background-color: transparent;<style>
+    /* CSS cơ bản */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        padding-bottom: 40px; /* Đảm bảo thanh trạng thái không che nội dung */
+    }
+    .header {
+        background-color: #4a6fff;
+        color: white;
+        padding: 20px 0;
+        margin-bottom: 30px;
+    }
+    .filter-section {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    .order-list {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Các badge và tag */
+    .service-tag {
+        display: inline-block;
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 2px 5px;
+        border-radius: 4px;
+        margin-right: 3px;
+        margin-bottom: 3px;
+        font-size: 0.75rem;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .badge-waiting {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    .badge-processing {
+        background-color: #17a2b8;
+        color: white;
+    }
+    .badge-completed {
+        background-color: #28a745;
+        color: white;
+    }
+/* Thêm vào phần style trong file index.html.txt */
+body.modal-open .modal-backdrop {
+  opacity: 0 !important;
+  z-index: -1 !important;
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.modal {
+  z-index: 9999 !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+.modal-content {
+  z-index: 10001 !important;
+  background-color: white !important;
+  border-radius: 0.3rem !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5) !important;
+}
+/* Đảm bảo các phần tử bên trong modal hoạt động */
+.modal-body, .modal-header, .modal-footer {
+  z-index: 10002 !important;
+  position: relative !important;
+}
+body.modal-open {
+  overflow: visible !important;
+  padding-right: 0 !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+.modal .btn {
+  position: relative !important;
+  z-index: 10003 !important;
+}
+.modal-dialog {
+  z-index: 10000 !important;
+  position: relative !important;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.modal-backdrop {
+    z-index: 1900 !important;
+}
+.loading-overlay {
+    z-index: 1800; /* Giảm xuống thấp hơn modal */
+}
+.modal-open .modal {
+    display: block !important;
+    opacity: 1 !important;
+}
+    .loading-message {
+        text-align: center;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    /* Preview hình ảnh */
+    .img-thumbnail-preview {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .img-thumbnail-preview:hover {
+        transform: scale(1.05);
+    }
+    #imagePreviewModal img {
+        max-width: 100%;
+        max-height: 80vh;
+    }
+    
+    /* Badges bộ lọc */
+    .filter-badge {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        background-color: #e9ecef;
+        color: #495057;
+        border-radius: 50px;
+        display: inline-block;
+    }
+    .filter-badge .close {
+        margin-left: 5px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .active-filters {
+        padding: 10px 0;
+    }
+    
+    /* Thanh trạng thái */
+    #statusBar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #343a40;
+        color: white;
+        padding: 5px 15px;
+        font-size: 12px;
+        z-index: 1000;
+    }
+    .status-item {
+        display: inline-block;
+        margin-right: 15px;
+    }
+    .success-text {
+        color: #28a745;
+    }
+    .error-text {
+        color: #dc3545;
+    }
+    .warning-text {
+        color: #ffc107;
+    }
+    
+    /* Debug panel */
+    .debug-panel {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    .debug-message {
+        margin-bottom: 5px;
+        border-bottom: 1px dotted #dee2e6;
+        padding-bottom: 3px;
+    }
+    .debug-timestamp {
+        color: #6c757d;
+        font-size: 10px;
+    }
+    
+    /* Hiệu ứng */
+    @keyframes highlight {
+        0% { background-color: transparent; }
+        50% { background-color: #d1ecf1; }
+        100% { background-color: transparent; }
+    }
+    /* Sửa lại CSS để tab hiện thị đúng */
+.tab-content > .tab-pane {
+    display: none !important;
+}
+.tab-content > .active {
+    display: block !important;
+}
+
+#orders-content {
+    display: block;
+}
+#orders-content.fade:not(.active) {
+    display: none !important;
+}
+    /* CSS cho khung thông tin nhân viên */
+.staff-info-panel {
+    margin: 20px 0;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.staff-info-panel .card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.staff-info-panel .card-header {
+    padding: 12px 16px;
+}
+
+.staff-info-panel .alert {
+    margin-bottom: 0;
+    border-left: 4px solid;
+}
+
+.staff-info-panel .alert-info {
+    border-left-color: #0dcaf0;
+}
+
+.staff-info-panel .alert-warning {
+    border-left-color: #ffc107;
+}
+
+.staff-info-panel h6 {
+    color: #495057;
+}
+
+.staff-info-panel .table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.staff-info-panel .table th {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.staff-info-panel .table td {
+    vertical-align: middle;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Thêm hiệu ứng nhấp nháy cho mục quan trọng */
+.blink-warning {
+    animation: blinkWarning 1.5s infinite;
+}
+
+@keyframes blinkWarning {
+    0% { color: inherit; }
+    50% { color: #dc3545; font-weight: bold; }
+    100% { color: inherit; }
+}
+
+/* Giữ lại css cho nút close màu trắng */
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+    .highlight-row {
+        animation: highlight 1.5s ease-in-out;
+    }
+    
+    /* Cải thiện giao diện bảng */
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    /* Làm cho bảng phù hợp với màn hình mà không cần cuộn ngang */
+    .table {
+        width: 100%;
+    }
+    
+    /* Điều chỉnh kích thước các cột để tối ưu không gian */
+    .table th, .table td {
+        padding: 8px 5px;
+        vertical-align: middle;
+    }
+    
+    /* Làm cho text trong bảng gọn gàng hơn */
+    .table th {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    /* Tối ưu cột mã đơn */
+    .table th:nth-child(1), .table td:nth-child(1) {
+        max-width: 100px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    
+    /* Tối ưu cột khách hàng */
+    .table th:nth-child(2), .table td:nth-child(2) {
+        max-width: 120px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    
+    /* Thu gọn cột dịch vụ */
+    .table th:nth-child(3), .table td:nth-child(3) {
+        max-width: 120px;
+    }
+    
+    /* Thu gọn các cột ngày */
+    .table th:nth-child(4), .table td:nth-child(4),
+    .table th:nth-child(5), .table td:nth-child(5) {
+        white-space: nowrap;
+        width: 90px;
+    }
+    
+/* Thu gọn cột trạng thái */
+.table th:nth-child(6), .table td:nth-child(6) {
+    width: 110px;
+}
+
+/* Thu gọn cột ghi chú KT */
+.table th:nth-child(7), .table td:nth-child(7) {
+    width: 120px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Thu gọn cột ghi chú LT */
+.table th:nth-child(8), .table td:nth-child(8) {
+    width: 120px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Thu gọn cột ảnh */
+.table th:nth-child(9), .table td:nth-child(9) {
+    width: 60px;
+    text-align: center;
+}
+
+/* Thu gọn cột phân đơn */
+.table th:nth-child(10), .table td:nth-child(10) {
+    width: 60px;
+    text-align: center;
+}
+
+/* Thu gọn cột người làm & dịch vụ */
+.table th:nth-child(11), .table td:nth-child(11) {
+    width: 150px;
+    max-width: 150px;
+}
+    
+    /* Sửa lại thead để giữ nguyên dù có kéo ngang */
+    @media (max-width: 992px) {
+        .table thead {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+    }
+    
+    /* CSS cho phần tiêu đề bảng để xác định rõ các cột */
+    .table thead th {
+        background-color: #f1f5f9;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    /* Tạo giao diện alternating rows để dễ nhìn */
+    .table tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    /* Làm nổi bật khi hover vào dòng */
+    .table tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    /* Tối ưu hiển thị ảnh trong modal */
+    #previewImage {
+        max-width: 100%;
+        max-height: 80vh;
+        transition: transform 0.3s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Tối ưu hiển thị form trong modal */
+    .modal-body .form-label {
+        font-weight: 500;
+    }
+    
+    /* Cải thiện hiển thị modal phân đơn */
+    #assignOrderModal .modal-body h6 {
+        margin-bottom: 10px;
+    }
+    
+    /* Tối ưu cho các field trong form */
+    .form-control, .form-select {
+        font-size: 0.9rem;
+    }
+    
+    /* Tối ưu cho thiết bị di động */
+    @media (max-width: 768px) {
+        .filter-section .row .col-md-3,
+        .filter-section .row .col-md-6 {
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            margin-bottom: 5px;
+        }
+        
+        #statusBar {
+            font-size: 10px;
+        }
+        
+        .status-item {
+            margin-right: 8px;
+        }
+    }
+/* Fix CSS triệt để cho tab */
+#schedule-content {
+    display: none;
+}
+#schedule-content.active.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 100 !important;
+    position: relative !important;
+}
+/* Đảm bảo không có phần tử nào đè lên trên tab khi active */
+.tab-pane.active.show {
+    display: block !important;
+    z-index: 50 !important;
+}
+/* Sửa xung đột với style từ bootstrap */
+#schedule-content.active.show * {
+    display: revert !important;
+}
+/* Đảm bảo cụ thể các phần tử con hiển thị */
+#scheduleTable,
+#scheduleTableBody,
+#scheduleWeekPicker,
+#scheduleConnectionStatus,
+#scheduleWeekRange,
+#checkSheetBtn,
+#loadScheduleBtn,
+#saveScheduleAssignmentBtn,
+#noScheduleMessage {
+    display: revert !important;
+    visibility: visible !important;
+}
+/* Đảm bảo bảng hiển thị đúng */
+.table {
+    display: table !important;
+}
+.table thead {
+    display: table-header-group !important;
+}
+.table tbody {
+    display: table-row-group !important;
+}
+.table tr {
+    display: table-row !important;
+}
+.table td, .table th {
+    display: table-cell !important;
+}
+/* Buộc các phần tử ẩn hiển thị khi cần */
+#schedule-content [style*="display: none"] {
+    display: revert !important;
+}
+.tab-pane {
+    display: none;
+}
+.tab-pane.active.show {
+    display: block !important;
+}
+    .tab-content > .tab-pane.active.show {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 50 !important;
+        position: relative !important;
+    }
+/* Fix Bootstrap Tab bug */
+    .nav-tabs .nav-link {
+        cursor: pointer !important;
+        user-select: none !important;
+    }
+    .nav-tabs .nav-link.active {
+        color: #495057 !important;
+        background-color: #fff !important;
+        border-color: #dee2e6 #dee2e6 #fff !important;
+    }
+/* Make sure all nested elements are properly displayed */
+#schedule-content .table,
+#schedule-content .form-control,
+#schedule-content .btn,
+#schedule-content select,
+#schedule-content input,
+#schedule-content .alert,
+#schedule-content .card,
+#schedule-content .card-header,
+#schedule-content .card-body,
+#schedule-content .table-responsive {
+    display: revert !important;
+}
+/* Đảm bảo hiển thị các phần tử con */
+#scheduleTable,
+#scheduleTableBody,
+#scheduleWeekPicker,
+#scheduleConnectionStatus,
+#scheduleWeekRange,
+#checkSheetBtn,
+#loadScheduleBtn,
+#saveScheduleAssignmentBtn,
+#noScheduleMessage {
+    display: revert !important;
+}
+/* Fix z-index cho các thành phần con */
+#schedule-content .card {
+    z-index: auto;
+    position: relative;
+}
+/* Đảm bảo tất cả các phần tử không bị ẩn */
+[style*="display: none"] {
+    display: revert !important;
+}
+</style>
+</head>
+<body>
+    <!-- Overlay loading khi đang tải dữ liệu -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <div class="loading-message" id="loadingMessage">Đang khởi tạo...</div>
+        </div>
+    </div>
+
+    <!-- Thanh trạng thái ở dưới cùng màn hình -->
+    <div id="statusBar">
+        <span class="status-item">Trạng thái: <span id="connectionStatus">Đang khởi tạo...</span></span>
+        <span class="status-item">Đơn hàng: <span id="dataStatus">Chưa tải</span></span>
+        <span class="status-item">Nhân viên: <span id="staffStatus">Chưa tải</span></span>
+        <span class="status-item">Cập nhật: <span id="lastUpdated">-</span></span>
+    </div>
+
+    <!-- Phần header của trang -->
+<div class="header">
+    <div class="container">
+        <h1 class="text-center">Hệ Thống Phân Đơn</h1>
+    </div>
+</div>
+
+<!-- Thanh điều hướng tab - THÊM MỚI -->
+<div class="container mb-3">
+    <ul class="nav nav-tabs" id="appTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-content" type="button" role="tab" aria-controls="orders-content" aria-selected="true">Phân Đơn</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-content" type="button" role="tab" aria-controls="schedule-content" aria-selected="false">Chia Lịch</button>
+        </li>
+    </ul>
+</div>
+<div class="tab-content" id="appTabsContent">
+    <!-- Tab Phân Đơn -->
+    <div class="tab-pane fade show active" id="orders-content" role="tabpanel" aria-labelledby="orders-tab">
+        <div class="container">
+            <!-- Thông báo ban đầu -->
+            <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert" id="initialAlert">
+                <strong>Chú ý!</strong> Nếu hệ thống đang kết nối lần đầu, có thể mất một lúc để tải dữ liệu. Nếu quá lâu, hãy nhấn nút "Kiểm tra kết nối" hoặc "Dùng dữ liệu mẫu".
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <!-- Panel debug (ẩn mặc định) -->
+            <div class="debug-panel" id="debugPanel" style="display: none;">
+                <h6>Debug Panel <button class="btn btn-sm btn-outline-secondary float-end" id="clearDebugBtn">Xóa</button></h6>
+                <div id="debugMessages"></div>
+            </div>
+            
+            <!-- Phần bộ lọc đơn hàng -->
+            <div class="filter-section">
+                <h4 class="mb-3">Bộ lọc đơn hàng</h4>
+                <div class="row g-3">
+                    <div class="col-md-3 mb-3">
+                        <label for="orderDateFrom" class="form-label">Ngày nhận đơn từ:</label>
+                        <input type="text" class="form-control" id="orderDateFrom" placeholder="Chọn ngày">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="orderDateTo" class="form-label">Đến:</label>
+                        <input type="text" class="form-control" id="orderDateTo" placeholder="Chọn ngày">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="returnDateFrom" class="form-label">Ngày trả đơn từ:</label>
+                        <input type="text" class="form-control" id="returnDateFrom" placeholder="Chọn ngày">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="returnDateTo" class="form-label">Đến:</label>
+                        <input type="text" class="form-control" id="returnDateTo" placeholder="Chọn ngày">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="serviceFilter" class="form-label">Dịch vụ:</label>
+                        <select class="form-select" id="serviceFilter">
+                            <option value="">Tất cả dịch vụ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="staffFilter" class="form-label">Nhân viên:</label>
+                        <select class="form-select" id="staffFilter">
+                            <option value="">Tất cả nhân viên</option>
+                            <!-- Các option sẽ được thêm bằng JS -->
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="statusFilter" class="form-label">Tình trạng:</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Tất cả tình trạng</option>
+                            <option value="Đang xử lý">Đang xử lý</option>
+                            <option value="QC Duyệt Đơn">QC Duyệt Đơn</option>
+                            <option value="Hoàn thành">Hoàn thành</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="orderIdFilter" class="form-label">Mã đơn hàng:</label>
+                        <input type="text" class="form-control" id="orderIdFilter" placeholder="Nhập mã đơn">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <div>
+                        <button class="btn btn-warning me-2" id="testConnectionBtn">
+                            <i class="bi bi-wifi"></i> Kiểm tra kết nối
+                        </button>
+                        <button class="btn btn-info me-2" id="useTestDataBtn">
+                            <i class="bi bi-clipboard-data"></i> Dùng dữ liệu mẫu
+                        </button>
+                        <button class="btn btn-secondary me-2" id="toggleDebugBtn" title="Hiển thị/Ẩn debug panel">
+                            <i class="bi bi-bug"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2" id="clearFilters">
+                            <i class="bi bi-x-circle"></i> Xóa bộ lọc
+                        </button>
+                        <button class="btn btn-primary" id="applyFilters">
+                            <i class="bi bi-funnel"></i> Áp dụng bộ lọc
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Hiển thị các bộ lọc đang hoạt động -->
+                <div class="active-filters mt-3" id="activeFilters">
+                    <!-- Các tag bộ lọc sẽ xuất hiện ở đây -->
+                </div>
+                <!-- Khung thông tin nhân viên mới -->
+                <div class="staff-info-panel" id="staffInfoPanel" style="display: none;">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-person-badge-fill me-2"></i>Thông tin nhân viên: <strong id="panelStaffName">-</strong></span>
+                            <button type="button" class="btn-close btn-close-white" id="closeStaffPanel" aria-label="Close"></button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="alert alert-info mb-3">
+                                        <h6 class="mb-1">Đơn đang xử lý</h6>
+                                        <div class="d-flex align-items-center">
+                                            <span class="fs-2 fw-bold me-2" id="panelOrderCount">0</span>
+                                            <span>đơn hàng</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-warning mb-3">
+                                        <h6 class="mb-1">Đơn cần trả sớm nhất</h6>
+                                        <div id="panelNextReturn">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="mt-2 mb-3"><i class="bi bi-calendar-check me-2"></i>Danh sách đơn hàng cần trả</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-hover">
+                                    <thead>
+                                        <tr class="table-light">
+                                            <th>Mã đơn</th>
+                                            <th>Dịch vụ</th>
+                                            <th>Ngày trả</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="panelOrderList">
+                                        <tr>
+                                            <td colspan="3" class="text-center">Không có đơn hàng</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Phần danh sách đơn hàng -->
+            <div class="order-list">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4><span id="totalOrders">0</span> đơn hàng</h4>
+                    <div>
+                        <button class="btn btn-outline-primary" id="refreshBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Làm mới
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Ngày nhận</th>
+                                <th>Ngày trả</th>
+                                <th>Tình trạng</th>
+                                <th>Ghi chú KT</th>
+                                <th>Ghi chú LT</th>
+                                <th>Ảnh</th>
+                                <th>Phân đơn</th>
+                                <th>Người làm & DV</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            <!-- Đơn hàng sẽ được thêm vào đây -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Thông báo khi không có đơn hàng -->
+                <div id="noOrdersMessage" class="alert alert-info text-center" style="display: none;">
+                    Không tìm thấy đơn hàng nào phù hợp với bộ lọc. Vui lòng thử lại với bộ lọc khác.
+                </div>
+
+                <!-- Phân trang -->
+                <nav aria-label="Page navigation" class="d-flex justify-content-center mt-4">
+                    <ul class="pagination" id="pagination">
+                        <!-- Số trang sẽ được thêm vào đây -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab Chia Lịch (đặt NGOÀI div orders-content, CÙNG CẤP với nó) -->
+    <div class="tab-pane fade" id="schedule-content" role="tabpanel" aria-labelledby="schedule-tab" style="margin-top: 10px; display: none;">
+        <!-- Nội dung từ lichlamviecui.html -->
+        <?!= include('lichlamviecui'); ?>
+    </div>
+</div>
+  <!-- Modal Phân đơn -->
+<div class="modal fade" id="assignOrderModal" tabindex="-1" aria-labelledby="assignOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignOrderModalLabel">Phân đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Mã đơn: <span id="modalOrderId"></span></h6>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Khách hàng: <span id="modalCustomerName"></span></h6>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Ngày nhận:</strong> <span id="modalOrderDate"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Ngày trả:</strong> <span id="modalReturnDate"></span></p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Dịch vụ:</h6>
+                    <div id="modalServiceList">
+                        <!-- Dịch vụ sẽ được thêm vào đây -->
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <p><strong>Ghi chú khách:</strong> <span id="modalCustomerNote"></span></p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <p><strong>Ghi chú lễ tân:</strong> <span id="modalReceptionistNote"></span></p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <form id="assignmentForm">
+                    <input type="hidden" id="rowIndex" name="rowIndex">
+                    
+                    <div class="mb-3">
+                        <label for="assignmentDate" class="form-label">Ngày phân đơn:</label>
+                        <input type="text" class="form-control" id="assignmentDate" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="qcNote" class="form-label">Ghi chú QC:</label>
+                        <textarea class="form-control" id="qcNote" rows="2"></textarea>
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3">Phân chia dịch vụ</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="service1" class="form-label">Dịch vụ 1:</label>
+                            <select class="form-select" id="service1">
+                                <option value="">Chọn dịch vụ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="assignee1" class="form-label">Người làm 1:</label>
+                            <select class="form-select" id="assignee1">
+                                <option value="">Chọn người làm</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="service2" class="form-label">Dịch vụ 2:</label>
+                            <select class="form-select" id="service2">
+                                <option value="">Chọn dịch vụ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="assignee2" class="form-label">Người làm 2:</label>
+                            <select class="form-select" id="assignee2">
+                                <option value="">Chọn người làm</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="service3" class="form-label">Dịch vụ 3:</label>
+                            <select class="form-select" id="service3">
+                                <option value="">Chọn dịch vụ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="assignee3" class="form-label">Người làm 3:</label>
+                            <select class="form-select" id="assignee3">
+                                <option value="">Chọn người làm</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="completionDate" class="form-label">Ngày hoàn thành:</label>
+                        <input type="text" class="form-control" id="completionDate">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="qcCheckbox">
+                        <label class="form-check-label" for="qcCheckbox">Đánh dấu QC hoàn thành</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="saveAssignment">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal Xem hình ảnh -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagePreviewModalLabel">Xem hình ảnh</h5>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-secondary me-2" id="rotateLeftBtn" title="Xoay trái 90°">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" id="rotateRightBtn" title="Xoay phải 90°">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="previewImage" src="" alt="Hình ảnh đơn hàng" style="max-width: 100%; max-height: 80vh; transition: transform 0.3s;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liên kết các thư viện JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+// Đảm bảo tab hoạt động đúng cách
+// Xử lý tab cải tiến
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - setting up tabs');
+    
+    // Xác định các tab một lần, lưu vào biến toàn cục để dễ truy cập từ bất kỳ đâu
+    window.ordersTab = document.getElementById('orders-tab');
+    window.scheduleTab = document.getElementById('schedule-tab');
+    window.ordersContent = document.getElementById('orders-content');
+    window.scheduleContent = document.getElementById('schedule-content');
+    
+    if (!window.ordersTab || !window.scheduleTab || !window.ordersContent || !window.scheduleContent) {
+        console.error('CRITICAL: Không tìm thấy các phần tử tab cần thiết!');
+        return;
+    }
+    
+    // Tạo các hàm xử lý tab toàn cục để có thể gọi từ nhiều nơi
+    window.showOrdersTab = function() {
+        // UI: Cập nhật các tab
+        window.ordersTab.classList.add('active');
+        window.scheduleTab.classList.remove('active');
+        
+        // Hiển thị content
+        window.ordersContent.style.display = 'block';
+        window.ordersContent.classList.add('active', 'show');
+        window.scheduleContent.style.display = 'none';
+        window.scheduleContent.classList.remove('active', 'show');
+        
+        console.log('Đã chuyển sang tab Phân Đơn');
+    };
+    
+    window.showScheduleTab = function() {
+        // UI: Cập nhật các tab
+        window.ordersTab.classList.remove('active');
+        window.scheduleTab.classList.add('active');
+        
+        // Hiển thị content
+        window.ordersContent.style.display = 'none';
+        window.ordersContent.classList.remove('active', 'show');
+        window.scheduleContent.style.display = 'block';
+        window.scheduleContent.classList.add('active', 'show');
+        
+        console.log('Đã chuyển sang tab Chia Lịch');
+        
+        // Đảm bảo tất cả các phần tử UI hiển thị đúng
+        const allElements = window.scheduleContent.querySelectorAll('div, table, input, button, select');
+        allElements.forEach(function(el) {
+            if (el.style.display === 'none') {
+                el.style.display = '';
+            }
+        });
+        
+        // Khởi tạo tab lịch
+        setTimeout(function() {
+            if (typeof window.initScheduleManagement === 'function') {
+                try {
+                    console.log('Gọi initScheduleManagement sau khi hiển thị tab');
+                    // Đặt lại biến khởi tạo để buộc khởi tạo lại
+                    window._scheduleInitialized = false;
+                    window.initScheduleManagement();
+                } catch (e) {
+                    console.error('Lỗi khởi tạo schedule management:', e);
+                }
+            } else {
+                console.error('FATAL: Hàm initScheduleManagement không tồn tại!');
+            }
+        }, 300);
+    };
+    
+    // Gán sự kiện click cho các tab
+    window.ordersTab.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.showOrdersTab();
+    });
+    
+    window.scheduleTab.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.showScheduleTab();
+    });
+});
+    
+
+
+// Kiểm tra và tự động khôi phục tab nếu có vấn đề
+(function() {
+    // Tự động khôi phục tab sau 3 giây nếu cần
+    window.setTimeout(function() {
+        // Kiểm tra xem tab Chia Lịch có đang active không
+        const scheduleTab = document.getElementById('schedule-tab');
+        const scheduleContent = document.getElementById('schedule-content');
+        
+        if (scheduleTab && scheduleTab.classList.contains('active')) {
+            // Kiểm tra xem nội dung có hiển thị không
+            if (scheduleContent && 
+                (getComputedStyle(scheduleContent).display === 'none' || 
+                 !scheduleContent.classList.contains('active'))) {
+                console.log('Phát hiện lỗi: Tab Chia Lịch đang active nhưng nội dung không hiển thị!');
+                
+                // Kích hoạt lại tab
+                if (typeof window.showScheduleTab === 'function') {
+                    console.log('Tự động khôi phục tab Chia Lịch');
+                    window.showScheduleTab();
+                }
+            }
+        }
+    }, 3000);
+})();
+</script>
+<!-- Nút khẩn cấp khôi phục tab -->
+<div id="emergencyTabFix" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: none;">
+    <button onclick="forceFixTab()" class="btn btn-danger btn-sm">
+        <i class="bi bi-exclamation-triangle"></i> Khôi phục Tab
+    </button>
+</div>
+
+<script>
+function forceFixTab() {
+    try {
+        console.log('Đang thực hiện khôi phục khẩn cấp tab...');
+        
+        // Hiển thị tab Chia Lịch với force render
+        if (typeof window.showScheduleTab === 'function') {
+            window.showScheduleTab(true);
+        }
+        
+        // Trực tiếp thay đổi DOM để hiển thị tab content
+        const scheduleContent = document.getElementById('schedule-content');
+        if (scheduleContent) {
+            scheduleContent.setAttribute("style", "display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 999 !important;");
+            
+            // Thêm lại các phần tử quan trọng nếu bị mất
+            const tableContainer = scheduleContent.querySelector('.table-responsive');
+            if (tableContainer && !tableContainer.innerHTML.trim()) {
+                tableContainer.innerHTML = `
+                <table class="table table-bordered table-hover" id="scheduleTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="20%">Nhân Viên Đăng Ký</th>
+                            <th width="15%">Ngày</th>
+                            <th width="15%">Ca Làm</th>
+                            <th width="20%">Phân Công Cho</th>
+                            <th width="20%">Ghi Chú</th>
+                            <th width="5%">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center">Vui lòng chọn tuần và tải dữ liệu</td>
+                        </tr>
+                    </tbody>
+                </table>`;
+            }
+        }
+        
+        // Thử khởi tạo lại
+        if (typeof initScheduleManagement === 'function') {
+            window._scheduleInitialized = false;
+            initScheduleManagement();
+        }
+        
+        alert('Đã thực hiện khôi phục tab. Hãy kiểm tra lại tab Chia Lịch.');
+    } catch (e) {
+        console.error('Lỗi khi khôi phục tab:', e);
+        alert('Không thể khôi phục tab: ' + e.message);
+    }
+}
+
+// Hiển thị nút khẩn cấp sau 5 giây
+setTimeout(function() {
+    const emergencyBtn = document.getElementById('emergencyTabFix');
+    if (emergencyBtn) emergencyBtn.style.display = 'block';
+}, 5000);
+</script>
+    <script>
+    // Tự động khôi phục tab sau 2 giây
+    setTimeout(function() {
+        const scheduleTab = document.getElementById('schedule-tab');
+        const scheduleContent = document.getElementById('schedule-content');
+        
+        if (scheduleTab && scheduleTab.classList.contains('active') && scheduleContent) {
+            console.log('Force hiển thị tab Chia Lịch');
+            
+            // Áp dụng nhiều kỹ thuật để hiển thị
+            scheduleContent.style.cssText = "display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 999 !important;";
+            
+            // Thử tạo lại tab
+            const tabContainer = scheduleTab.parentNode;
+            if (tabContainer) {
+                const newTab = scheduleTab.cloneNode(true);
+                tabContainer.replaceChild(newTab, scheduleTab);
+                
+                newTab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof window.showScheduleTab === 'function') {
+                        window.showScheduleTab(true);
+                    }
+                });
+                
+                // Kích hoạt lại tab
+                newTab.click();
+            }
+        }
+    }, 2000);
+    </script>
+</body>
+</html>
+
+<script>
+// ======== CẤU HÌNH VÀ BIẾN TOÀN CỤC ========
+
+// Cấu hình xử lý lỗi toàn cục
+window.onerror = function(message, source, lineno, colno, error) {
+    updateStatus('connectionStatus', 'Lỗi JavaScript: ' + message, 'error-text');
+    addDebugMessage('Lỗi JavaScript toàn cục: ' + message);
+    console.error('Lỗi toàn cục:', message, source, lineno, colno, error);
+    document.getElementById('loadingOverlay').style.display = 'none';
+    return true;
+};
+// Các biến toàn cục
+let allOrders = [];         // Lưu tất cả đơn hàng
+let filteredOrders = [];    // Lưu đơn hàng sau khi lọc
+let uniqueOrderIds = new Set(); // Lưu mã đơn hàng duy nhất để đếm chính xác
+let staffList = [];         // Danh sách nhân viên
+let serviceList = [];       // Danh sách dịch vụ
+let currentPage = 1;        // Trang hiện tại
+const itemsPerPage = 10;    // Số đơn hàng mỗi trang
+let loadingTimeout;         // Hẹn giờ cho lớp loading
+let isUsingTestData = false; // Đánh dấu đang sử dụng dữ liệu mẫu
+let lastFilterApplied = {};  // Lưu bộ lọc gần nhất
+let savedFilters = { serviceFilter: "", statusFilter: "", staffFilter: "" }; // Lưu trạng thái bộ lọc khi phân đơn
+
+
+// Biến theo dõi góc xoay hình ảnh
+let rotationAngle = 0;
+
+// Các Modal
+let assignOrderModal;       // Modal phân đơn
+let imagePreviewModal;      // Modal xem ảnh
+
+// ======== FUNCTIONS KHỞI TẠO ========
+
+// Khởi tạo ứng dụng
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Ứng dụng đã khởi động');
+    addDebugMessage('Ứng dụng đã khởi động');
+    updateStatus('connectionStatus', 'Đang khởi tạo...', 'warning-text');
+    
+    // Đảm bảo luôn ẩn loading sau 10 giây bất kể điều gì xảy ra
+    setTimeout(function() { 
+        document.getElementById('loadingOverlay').style.display = 'none';
+        addDebugMessage('Ẩn loading bằng timeout khẩn cấp sau 10 giây');
+    }, 10000);
+    
+    // Khởi tạo các date picker
+    initDatepickers();
+    
+    // Khởi tạo các modal
+    assignOrderModal = new bootstrap.Modal(document.getElementById('assignOrderModal'));
+    imagePreviewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+    
+
+// Thêm sự kiện cho nút đóng panel thông tin nhân viên
+document.getElementById('closeStaffPanel').addEventListener('click', function() {
+    document.getElementById('staffInfoPanel').style.display = 'none';
+});
+    
+    // Thêm các bộ lắng nghe sự kiện
+    document.getElementById('applyFilters').addEventListener('click', function() {
+        addDebugMessage('Nút "Áp dụng bộ lọc" được nhấn');
+        applyFilters();
+    });
+    document.getElementById('qcCheckbox').addEventListener('change', function() {
+    if (this.checked) {
+        // Tự động điền ngày hoàn thành là ngày hiện tại
+        document.getElementById('completionDate').value = formatDate(new Date());
+    }
+    });
+    document.getElementById('clearFilters').addEventListener('click', function() {
+        addDebugMessage('Nút "Xóa bộ lọc" được nhấn');
+        clearFilters();
+    });
+    
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        addDebugMessage('Nút "Làm mới" được nhấn');
+        fetchData();
+    });
+    
+    document.getElementById('testConnectionBtn').addEventListener('click', function() {
+        addDebugMessage('Nút "Kiểm tra kết nối" được nhấn');
+        testConnection();
+    });
+    
+    document.getElementById('useTestDataBtn').addEventListener('click', function() {
+        addDebugMessage('Nút "Dùng dữ liệu mẫu" được nhấn');
+        useTestData();
+    });
+    
+    document.getElementById('saveAssignment').addEventListener('click', function() {
+        addDebugMessage('Nút "Lưu thay đổi" được nhấn trong modal phân đơn');
+        saveAssignment();
+    });
+    
+    document.getElementById('toggleDebugBtn').addEventListener('click', function() {
+        const debugPanel = document.getElementById('debugPanel');
+        if (debugPanel.style.display === 'none') {
+            debugPanel.style.display = 'block';
+        } else {
+            debugPanel.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('clearDebugBtn').addEventListener('click', function() {
+        document.getElementById('debugMessages').innerHTML = '';
+        addDebugMessage('Debug log đã được xóa');
+    });
+    
+    // Thêm xử lý cho trường input để áp dụng bộ lọc khi nhấn Enter
+    document.getElementById('orderIdFilter').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            applyFilters();
+        }
+    });
+    
+    // Thêm sự kiện cho nút xoay ảnh
+    setupImageRotation();
+    
+    // Kiểm tra kết nối trước, sau đó lấy dữ liệu
+    testConnection(true);
+});
+
+// Thiết lập sự kiện xoay ảnh
+function setupImageRotation() {
+    try {
+        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+        const rotateRightBtn = document.getElementById('rotateRightBtn');
+
+        if (rotateLeftBtn && rotateRightBtn) {
+            rotateLeftBtn.addEventListener('click', function() {
+                rotationAngle -= 90; // Xoay trái 90 độ
+                const previewImage = document.getElementById('previewImage');
+                if (previewImage && previewImage.src) {
+                    previewImage.style.transform = `rotate(${rotationAngle}deg)`;
+                }
+                addDebugMessage('Xoay trái 90° cho hình ảnh. Góc hiện tại: ' + rotationAngle + ' độ');
+            });
+
+            rotateRightBtn.addEventListener('click', function() {
+                rotationAngle += 90; // Xoay phải 90 độ
+                const previewImage = document.getElementById('previewImage');
+                if (previewImage && previewImage.src) {
+                    previewImage.style.transform = `rotate(${rotationAngle}deg)`;
+                }
+                addDebugMessage('Xoay phải 90° cho hình ảnh. Góc hiện tại: ' + rotationAngle + ' độ');
+            });
+        } else {
+            console.warn('Nút xoay không tồn tại trong DOM');
+            addDebugMessage('Nút xoay không tồn tại trong DOM');
+        }
+    } catch (error) {
+        console.error('Lỗi khi thiết lập sự kiện xoay ảnh:', error);
+        addDebugMessage('Lỗi khi thiết lập sự kiện xoay ảnh: ' + error.message);
+    }
+}
+// Function hiển thị thông tin nhân viên trong panel
+function updateStaffInfoPanel(staffName) {
+    // Lấy tham chiếu đến panel
+    const staffInfoPanel = document.getElementById('staffInfoPanel');
+    
+    // Nếu không có tên nhân viên, ẩn panel và không làm gì cả
+    if (!staffName) {
+        staffInfoPanel.style.display = 'none';
+        return;
+    }
+    
+    // Đếm số đơn hàng đang xử lý của nhân viên
+    let processingOrders = allOrders.filter(order => {
+        // Kiểm tra xem đơn hàng có thuộc về nhân viên này không
+        const isAssignedToStaff = 
+            (order.assignee1 === staffName) || 
+            (order.assignee2 === staffName) || 
+            (order.assignee3 === staffName);
+        
+        // Kiểm tra trạng thái đơn hàng "Đơn đang được xử lý"
+        const isProcessing = 
+            order.orderStatus === "Đơn đang được xử lý" || 
+            order.orderStatus === "Đang xử lý" ||
+            order.orderStatus === "Hoàn Thành,Chờ QC";
+        
+        return isAssignedToStaff && isProcessing;
+    });
+    
+    // Cập nhật thông tin vào panel
+    document.getElementById('panelStaffName').textContent = staffName;
+    document.getElementById('panelOrderCount').textContent = processingOrders.length;
+    
+    // Tạo danh sách đơn hàng
+    const orderListContainer = document.getElementById('panelOrderList');
+    orderListContainer.innerHTML = '';
+    
+    // Hiển thị thông báo nếu không có đơn hàng
+    if (processingOrders.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 3;
+        cell.className = 'text-center';
+        cell.textContent = 'Không có đơn hàng đang xử lý';
+        row.appendChild(cell);
+        orderListContainer.appendChild(row);
+        
+        // Cập nhật thông tin ngày trả sớm nhất
+        document.getElementById('panelNextReturn').textContent = 'Không có';
+        
+        // Hiển thị panel
+        staffInfoPanel.style.display = 'block';
+        addDebugMessage(`Hiển thị thông tin cho ${staffName}: Không có đơn hàng đang xử lý`);
+        return;
+    }
+    
+    // Sắp xếp đơn hàng theo ngày trả (sớm nhất lên đầu)
+    processingOrders.sort((a, b) => {
+        const dateA = parseDate(a.returnDate) || new Date(9999, 11, 31); // Ngày xa trong tương lai nếu không có ngày
+        const dateB = parseDate(b.returnDate) || new Date(9999, 11, 31);
+        return dateA - dateB;
+    });
+    
+    // Tìm đơn hàng cần trả sớm nhất
+    let nextReturnDate = processingOrders[0].returnDate || 'Chưa có';
+    let nextReturnOrderId = processingOrders[0].orderId;
+    
+    // Kiểm tra xem đơn hàng sớm nhất có trễ hạn không
+    const today = new Date();
+    const nextReturnDateObj = parseDate(nextReturnDate);
+    let isOverdue = false;
+    
+    if (nextReturnDateObj && nextReturnDateObj < today) {
+        isOverdue = true;
+    }
+    
+    // Hiển thị ngày trả sớm nhất
+    const nextReturnElement = document.getElementById('panelNextReturn');
+    nextReturnElement.innerHTML = `<span class="${isOverdue ? 'blink-warning' : ''}">
+        <strong>${nextReturnDate}</strong> - <span class="text-primary">${nextReturnOrderId}</span>
+    </span>`;
+    
+    // Thêm từng đơn hàng vào danh sách
+    processingOrders.forEach(order => {
+        const row = document.createElement('tr');
+        
+        // Mã đơn
+        const orderIdCell = document.createElement('td');
+        orderIdCell.textContent = order.orderId;
+        row.appendChild(orderIdCell);
+        
+        // Dịch vụ
+        const serviceCell = document.createElement('td');
+        if (order.services) {
+            const primaryService = order.services.split('|')[0].trim();
+            serviceCell.textContent = primaryService;
+            if (order.services.includes('|')) {
+                serviceCell.title = order.services; // Hiển thị toàn bộ dịch vụ khi hover
+            }
+        } else {
+            serviceCell.textContent = 'N/A';
+        }
+        row.appendChild(serviceCell);
+        
+        // Ngày trả
+        const returnDateCell = document.createElement('td');
+        returnDateCell.textContent = order.returnDate || 'Chưa có';
+        
+        // Nếu ngày trả quá hạn, hiển thị màu đỏ
+        const returnDateValue = parseDate(order.returnDate);
+        if (returnDateValue && returnDateValue < today) {
+            returnDateCell.className = 'text-danger fw-bold';
+            returnDateCell.textContent += ' (Trễ)';
+        }
+        
+        row.appendChild(returnDateCell);
+        
+        // Thêm vào bảng
+        orderListContainer.appendChild(row);
+    });
+    
+    // Hiển thị panel
+    staffInfoPanel.style.display = 'block';
+    addDebugMessage(`Hiển thị thông tin cho ${staffName}: ${processingOrders.length} đơn hàng đang xử lý`);
+}
+// Khởi tạo các date picker
+function initDatepickers() {
+    const dateInputs = [
+        'orderDateFrom', 'orderDateTo', 'returnDateFrom', 'returnDateTo',
+        'assignmentDate', 'completionDate'
+    ];
+    
+    dateInputs.forEach(id => {
+        flatpickr(`#${id}`, {
+            dateFormat: "d/m/Y",
+            allowInput: true,
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+    });
+    
+    console.log('Date pickers đã được khởi tạo');
+    addDebugMessage('Date pickers đã được khởi tạo');
+}
+// Kiểm tra kết nối với server
+function testConnection(autoFetch = false) {
+    updateStatus('connectionStatus', 'Đang kiểm tra kết nối...', 'warning-text');
+    showLoading('Đang kiểm tra kết nối...');
+    addDebugMessage('Đang kiểm tra kết nối...');
+    
+    // Đặt thời gian chờ để tự động ẩn loading sau 10 giây
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+    }
+    loadingTimeout = setTimeout(function() {
+        hideLoading();
+        updateStatus('connectionStatus', 'Timeout - không nhận được phản hồi', 'error-text');
+        addDebugMessage('Timeout - không nhận được phản hồi từ server sau 10 giây');
+        alert("Không nhận được phản hồi từ server sau 10 giây. Vui lòng thử lại hoặc dùng dữ liệu mẫu.");
+    }, 10000);
+    
+    google.script.run
+        .withSuccessHandler(function(response) {
+            clearTimeout(loadingTimeout);
+            
+            if (response && response.success) {
+                updateStatus('connectionStatus', 'Kết nối thành công', 'success-text');
+                updateStatus('lastUpdated', getCurrentTime(), '');
+                addDebugMessage('Kết nối thành công: ' + JSON.stringify(response));
+                
+                if (autoFetch) {
+                    // Nếu kết nối thành công và autoFetch được bật, lấy dữ liệu
+                    fetchData();
+                } else {
+                    hideLoading();
+                    alert("Kết nối thành công!");
+                }
+            } else {
+                updateStatus('connectionStatus', 'Lỗi kết nối', 'error-text');
+                hideLoading();
+                addDebugMessage('Lỗi kết nối: ' + JSON.stringify(response));
+                alert("Lỗi kết nối: " + (response ? response.message : "Không xác định") + "\nVui lòng thử lại hoặc dùng dữ liệu mẫu.");
+            }
+        })
+        .withFailureHandler(function(error) {
+            clearTimeout(loadingTimeout);
+            hideLoading();
+            
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            updateStatus('connectionStatus', 'Lỗi kết nối', 'error-text');
+            addDebugMessage('Lỗi kết nối: ' + errorMessage);
+            console.error('Lỗi kiểm tra kết nối:', error);
+            
+            alert("Lỗi kết nối: " + errorMessage + "\nVui lòng thử lại hoặc dùng dữ liệu mẫu.");
+        })
+        .testConnection();
+}
+
+// Sử dụng dữ liệu mẫu thay vì dữ liệu thực
+function useTestData() {
+    showLoading('Đang tải dữ liệu mẫu...');
+    isUsingTestData = true;
+    updateStatus('connectionStatus', 'Sử dụng dữ liệu mẫu', 'warning-text');
+    addDebugMessage('Đang yêu cầu dữ liệu mẫu');
+    
+    // Gọi với bộ lọc trống để lấy tất cả dữ liệu mẫu
+    google.script.run
+        .withSuccessHandler(function(response) {
+            addDebugMessage('Đã nhận dữ liệu mẫu: ' + response.length + ' đơn hàng');
+            
+            // Gán trực tiếp vào cả allOrders và filteredOrders
+            allOrders = response;
+            filteredOrders = response;
+            
+            // Tính số lượng mã đơn duy nhất
+            uniqueOrderIds = new Set(response.map(order => order.orderId));
+            
+            // Trích xuất danh sách dịch vụ
+            extractServiceList();
+            
+            // Cập nhật giao diện
+            updateFilters();
+            currentPage = 1;
+            updatePagination();
+            displayOrders();
+            
+            // Cập nhật trạng thái
+            updateStatus('dataStatus', `${uniqueOrderIds.size} đơn hàng (mẫu)`, 'warning-text');
+            
+            // Đồng thời tải danh sách nhân viên mẫu
+            staffList = ["Nhân viên A", "Nhân viên B", "Nhân viên C", "Nhân viên X", "Nhân viên Y", "Nhân viên Z"];
+            updateAssigneeDropdowns('assignee1');
+            updateAssigneeDropdowns('assignee2');
+            updateAssigneeDropdowns('assignee3');
+            updateStatus('staffStatus', 'Dữ liệu mẫu', 'warning-text');
+            updateStatus('lastUpdated', getCurrentTime(), '');
+            hideLoading();
+        })
+        .withFailureHandler(function(error) {
+            hideLoading();
+            updateStatus('dataStatus', 'Lỗi dữ liệu mẫu', 'error-text');
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            addDebugMessage('Lỗi tải dữ liệu mẫu: ' + errorMessage);
+            alert("Không thể tải dữ liệu mẫu: " + errorMessage);
+        })
+        .getFilteredTestData({});
+}
+
+// ======== FUNCTIONS LẤY DỮ LIỆU ========
+
+// Lấy dữ liệu từ Google Sheet thông qua Apps Script
+function fetchData() {
+    showLoading('Đang tải danh sách nhân viên và dịch vụ...');
+    updateStatus('dataStatus', 'Đang tải...', 'warning-text');
+    updateStatus('staffStatus', 'Đang tải...', 'warning-text');
+    addDebugMessage('Đang tải danh sách nhân viên và dịch vụ ban đầu');
+    
+    // Đặt thời gian chờ để tự động ẩn loading sau 15 giây
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+    }
+    loadingTimeout = setTimeout(function() {
+        hideLoading();
+        updateStatus('dataStatus', 'Chưa tải', 'warning-text');
+        updateStatus('staffStatus', 'Timeout', 'error-text');
+        addDebugMessage('Timeout khi tải dữ liệu sau 15 giây');
+        
+        alert("Không nhận được phản hồi từ server sau 15 giây. Vui lòng thử lại hoặc dùng dữ liệu mẫu.");
+    }, 15000);
+    
+    try {
+        // Chỉ tải danh sách nhân viên ban đầu, không tải đơn hàng
+        google.script.run
+            .withSuccessHandler(function(data) {
+                addDebugMessage('Đã nhận dữ liệu nhân viên: ' + (data ? data.length : 0) + ' người');
+                handleStaffData(data);
+                
+                // Ẩn loading sau khi tải danh sách nhân viên
+                clearTimeout(loadingTimeout);
+                hideLoading();
+                
+                // Hiển thị hướng dẫn cho người dùng
+                updateStatus('dataStatus', 'Chưa tải dữ liệu', 'warning-text');
+                updateStatus('lastUpdated', getCurrentTime(), '');
+                
+                // Hiển thị thông báo hướng dẫn
+                const noOrdersMessage = document.getElementById('noOrdersMessage');
+                noOrdersMessage.textContent = 'Vui lòng thiết lập bộ lọc và nhấn "Áp dụng bộ lọc" để tải dữ liệu đơn hàng.';
+                noOrdersMessage.style.display = 'block';
+                
+                // Khôi phục các bộ lọc đã lưu
+                if (savedFilters.serviceFilter) {
+                    document.getElementById('serviceFilter').value = savedFilters.serviceFilter;
+                }
+                if (savedFilters.statusFilter) {
+                    document.getElementById('statusFilter').value = savedFilters.statusFilter;
+                }
+                if (savedFilters.staffFilter) {
+                    document.getElementById('staffFilter').value = savedFilters.staffFilter;
+                }
+            })
+            .withFailureHandler(function(error) {
+                clearTimeout(loadingTimeout);
+                
+                updateStatus('staffStatus', 'Lỗi tải', 'error-text');
+                const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                addDebugMessage('Lỗi tải dữ liệu nhân viên: ' + errorMessage);
+                console.error('Lỗi tải dữ liệu nhân viên:', error);
+                
+                // Sử dụng danh sách nhân viên mặc định trong trường hợp lỗi
+                staffList = ["Nhân viên A", "Nhân viên B", "Nhân viên C", "Nhân viên X", "Nhân viên Y", "Nhân viên Z"];
+                updateAssigneeDropdowns('assignee1');
+                updateAssigneeDropdowns('assignee2');
+                updateAssigneeDropdowns('assignee3');
+                updateStaffFilter(); // Đảm bảo cập nhật cả dropdown Staff Filter
+                
+                // Ẩn loading
+                hideLoading();
+            })
+            .getStaffList();
+        
+    } catch (error) {
+        clearTimeout(loadingTimeout);
+        hideLoading();
+        
+        updateStatus('dataStatus', 'Lỗi không xác định', 'error-text');
+        const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+        addDebugMessage('Lỗi không xác định khi tải dữ liệu: ' + errorMessage);
+        console.error('Lỗi trong fetchData:', error);
+        alert("Lỗi không xác định: " + errorMessage + "\nVui lòng thử lại sau.");
+    }
+}
+
+// Xử lý dữ liệu đơn hàng nhận được từ server
+// Xử lý dữ liệu đơn hàng nhận được từ server
+function handleOrderData(data) {
+    clearTimeout(loadingTimeout);
+    
+    if (!data || data.length === 0) {
+        updateStatus('dataStatus', 'Không có dữ liệu', 'warning-text');
+        allOrders = [];
+        uniqueOrderIds = new Set();
+        addDebugMessage('Không có dữ liệu đơn hàng');
+    } else {
+        // Lọc các đơn hàng không hợp lệ (không có mã đơn)
+        allOrders = data.filter(order => order.orderId && order.orderId.trim() !== '');
+        
+        // Tính số lượng mã đơn duy nhất
+        uniqueOrderIds = new Set(allOrders.map(order => order.orderId));
+        
+        updateStatus('dataStatus', `${uniqueOrderIds.size} đơn hàng`, 'success-text');
+        addDebugMessage(`Đã nhận ${allOrders.length} dòng dữ liệu, có ${uniqueOrderIds.size} mã đơn duy nhất`);
+    }
+    
+    // Trích xuất danh sách dịch vụ
+    extractServiceList();
+    
+    // Cập nhật giao diện người dùng
+    updateFilters();
+    
+    // Khôi phục các bộ lọc đã lưu cho dịch vụ
+    if (savedFilters.serviceFilter) {
+        document.getElementById('serviceFilter').value = savedFilters.serviceFilter;
+    }
+    
+    // Đặt filteredOrders = allOrders (vì đã được lọc từ server)
+    filteredOrders = [...allOrders];
+    
+    // Hiển thị kết quả
+    currentPage = 1;
+    updatePagination();
+    displayOrders();
+    
+    // Ẩn loading nếu dữ liệu nhân viên cũng đã được tải
+    if (staffList.length > 0) {
+        hideLoading();
+    }
+    
+    // Cập nhật thời gian cập nhật gần nhất
+    updateStatus('lastUpdated', getCurrentTime(), '');
+}
+
+// Xử lý dữ liệu nhân viên nhận được từ server
+function handleStaffData(data) {
+    staffList = data || [];
+    
+    if (staffList.length === 0) {
+        updateStatus('staffStatus', 'Không có dữ liệu', 'warning-text');
+        addDebugMessage('Không có dữ liệu nhân viên');
+    } else {
+        updateStatus('staffStatus', `${staffList.length} nhân viên`, 'success-text');
+        addDebugMessage(`Đã nhận ${staffList.length} nhân viên`);
+    }
+    
+    // Cập nhật danh sách dropdown nhân viên
+    updateAssigneeDropdowns('assignee1');
+    updateAssigneeDropdowns('assignee2');
+    updateAssigneeDropdowns('assignee3');
+    updateStaffFilter(); // Đảm bảo cập nhật cả dropdown Staff Filter
+    
+    // Ẩn loading nếu dữ liệu đơn hàng cũng đã được tải
+    if (allOrders.length > 0) {
+        hideLoading();
+    }
+}
+
+// Xử lý lỗi khi lấy dữ liệu
+function handleDataError(error) {
+    updateStatus('dataStatus', 'Lỗi tải dữ liệu', 'error-text');
+    
+    const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+    addDebugMessage('Lỗi tải dữ liệu: ' + errorMessage);
+    console.error('Lỗi tải dữ liệu:', error);
+    alert("Không thể tải dữ liệu: " + errorMessage);
+    
+    hideLoading();
+}
+
+// Trích xuất danh sách dịch vụ từ tất cả đơn hàng
+function extractServiceList() {
+    try {
+        const serviceSet = new Set();
+        
+        allOrders.forEach(order => {
+            if (order.services) {
+                const serviceArray = order.services.split('|').map(s => s.trim());
+                serviceArray.forEach(service => {
+                    if (service) serviceSet.add(service);
+                });
+            }
+        });
+        
+        serviceList = Array.from(serviceSet).sort();
+        addDebugMessage(`Đã trích xuất ${serviceList.length} dịch vụ: ${serviceList.join(', ')}`);
+        console.log('Extracted services:', serviceList); // Thêm log để debug
+        
+        // Quan trọng: Đảm bảo gọi updateServiceDropdown() sau khi trích xuất
+        updateServiceDropdown();
+        
+    } catch (e) {
+        console.error('Lỗi khi trích xuất danh sách dịch vụ:', e);
+        serviceList = [];
+        addDebugMessage('Lỗi khi trích xuất danh sách dịch vụ: ' + e.toString());
+    }
+}
+function updateServiceDropdown() {
+    try {
+        console.log('Updating service dropdown with:', serviceList); // Thêm log
+        const serviceFilter = document.getElementById('serviceFilter');
+        if (!serviceFilter) {
+            console.error('Không tìm thấy element serviceFilter');
+            addDebugMessage('Lỗi: Không tìm thấy element serviceFilter');
+            return;
+        }
+        
+        // Lưu giá trị đã chọn
+        const selectedValue = serviceFilter.value;
+        
+        // Xóa tất cả các option hiện tại, chỉ giữ lại option đầu tiên
+        while (serviceFilter.options.length > 1) {
+            serviceFilter.remove(1);
+        }
+        
+        // Thêm dịch vụ vào dropdown
+        if (serviceList && serviceList.length > 0) {
+            serviceList.forEach(service => {
+                if (service) {
+                    const option = document.createElement('option');
+                    option.value = service;
+                    option.textContent = service;
+                    serviceFilter.appendChild(option);
+                }
+            });
+            
+            // Khôi phục giá trị đã chọn nếu có
+            if (selectedValue) {
+                serviceFilter.value = selectedValue;
+            }
+            
+            console.log(`Added ${serviceList.length} services to dropdown`); // Thêm log
+            addDebugMessage(`Đã cập nhật ${serviceList.length} dịch vụ trong dropdown`);
+        } else {
+            console.warn('No services to add to dropdown');
+        }
+    } catch (e) {
+        console.error('Lỗi trong updateServiceDropdown:', e);
+        addDebugMessage('Lỗi trong updateServiceDropdown: ' + e.toString());
+    }
+}
+// ======== FUNCTIONS BỘ LỌC ========
+
+// Cập nhật bộ lọc
+function updateFilters() {
+    try {
+        // Cập nhật bộ lọc dịch vụ
+        const serviceFilter = document.getElementById('serviceFilter');
+        if (!serviceFilter) {
+            console.error('Không tìm thấy element serviceFilter');
+            addDebugMessage('Lỗi: Không tìm thấy element serviceFilter');
+            return;
+        }
+        
+        // Lưu giá trị đã chọn
+        const selectedService = serviceFilter.value;
+        
+        // Xóa tất cả các option hiện tại, chỉ giữ lại option đầu tiên
+        while (serviceFilter.options.length > 1) {
+            serviceFilter.remove(1);
+        }
+        
+        // Thêm dịch vụ vào dropdown
+        if (serviceList && serviceList.length > 0) {
+            serviceList.forEach(service => {
+                if (service) {
+                    const option = document.createElement('option');
+                    option.value = service;
+                    option.textContent = service;
+                    serviceFilter.appendChild(option);
+                }
+            });
+            
+            // Khôi phục giá trị đã chọn nếu có và tồn tại trong danh sách mới
+            if (selectedService) {
+                // Kiểm tra xem giá trị đã chọn còn tồn tại không
+                let exists = false;
+                for (let i = 0; i < serviceFilter.options.length; i++) {
+                    if (serviceFilter.options[i].value === selectedService) {
+                        exists = true;
+                        break;
+                    }
+                }
+                
+                if (exists) {
+                    serviceFilter.value = selectedService;
+                }
+            }
+            
+            addDebugMessage(`Đã cập nhật ${serviceList.length} dịch vụ trong bộ lọc`);
+        } else {
+            addDebugMessage('Không có dịch vụ để cập nhật bộ lọc');
+        }
+        
+        // Cập nhật bộ lọc tình trạng đơn
+        const statusFilter = document.getElementById('statusFilter');
+        // Giữ lại các option mặc định
+        statusFilter.innerHTML = `
+            <option value="">Tất cả tình trạng</option>
+            <option value="Đang xử lý">Đang xử lý</option>
+            <option value="QC Duyệt Đơn">QC Duyệt Đơn</option>
+            <option value="Hoàn thành">Hoàn thành</option>
+        `;
+        
+        // Lấy danh sách tình trạng đơn duy nhất từ dữ liệu
+        const statusList = extractStatusList();
+        
+        // Thêm các trạng thái khác từ dữ liệu (nếu có)
+        statusList.forEach(status => {
+            // Kiểm tra xem đã có trạng thái này trong options chưa
+            let exists = false;
+            for (let i = 0; i < statusFilter.options.length; i++) {
+                if (statusFilter.options[i].value === status) {
+                    exists = true;
+                    break;
+                }
+            }
+            
+            // Nếu chưa có, thêm vào
+            if (!exists) {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                statusFilter.appendChild(option);
+            }
+        });
+        
+        // Cập nhật bộ lọc nhân viên
+        updateStaffFilter();
+        
+        addDebugMessage('Đã cập nhật danh sách dịch vụ, tình trạng đơn và nhân viên trong bộ lọc');
+    } catch (e) {
+        console.error('Lỗi trong updateFilters:', e);
+        addDebugMessage('Lỗi trong updateFilters: ' + e.toString());
+    }
+}
+
+
+// Trích xuất danh sách trạng thái đơn từ tất cả đơn hàng
+function extractStatusList() {
+    const statusSet = new Set();
+    
+    allOrders.forEach(order => {
+        if (order.orderStatus && order.orderStatus.trim() !== '') {
+            statusSet.add(order.orderStatus);
+        }
+    });
+    
+    const statusList = Array.from(statusSet).sort();
+    addDebugMessage(`Đã trích xuất ${statusList.length} trạng thái đơn: ${statusList.join(', ')}`);
+    return statusList;
+}
+
+// Cập nhật danh sách dropdown nhân viên
+function updateAssigneeDropdowns(elementId) {
+    try {
+        const dropdown = document.getElementById(elementId);
+        if (!dropdown) {
+            console.error(`Không tìm thấy element ${elementId}`);
+            addDebugMessage(`Lỗi: Không tìm thấy element ${elementId}`);
+            return;
+        }
+        
+        // Lưu giá trị đã chọn
+        const selectedValue = dropdown.value;
+        
+        // Xóa tất cả các option hiện tại, chỉ giữ lại option đầu tiên
+        while (dropdown.options.length > 1) {
+            dropdown.remove(1);
+        }
+        
+        // Thêm danh sách nhân viên
+        if (staffList && staffList.length > 0) {
+            staffList.forEach(staff => {
+                if (staff) {
+                    const option = document.createElement('option');
+                    option.value = staff;
+                    option.textContent = staff;
+                    dropdown.appendChild(option);
+                }
+            });
+            
+            // Khôi phục giá trị đã chọn nếu có
+            if (selectedValue) {
+                dropdown.value = selectedValue;
+            }
+        } else {
+            // Trường hợp không có dữ liệu nhân viên
+            const defaultStaff = ["Nhân viên A", "Nhân viên B", "Nhân viên C", "Nhân viên X", "Nhân viên Y", "Nhân viên Z"];
+            defaultStaff.forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff;
+                option.textContent = staff;
+                dropdown.appendChild(option);
+            });
+        }
+    } catch (e) {
+        console.error(`Lỗi trong updateAssigneeDropdowns với ${elementId}:`, e);
+        addDebugMessage(`Lỗi trong updateAssigneeDropdowns với ${elementId}: ` + e.toString());
+    }
+}
+
+// Áp dụng bộ lọc
+// Áp dụng bộ lọc - gửi filter đến server
+function applyFilters() {
+    // Hiển thị loading khi lọc
+    showLoading('Đang tải dữ liệu phù hợp...');
+    
+    // Lấy giá trị từ các bộ lọc
+    const orderDateFrom = document.getElementById('orderDateFrom').value;
+    const orderDateTo = document.getElementById('orderDateTo').value;
+    const returnDateFrom = document.getElementById('returnDateFrom').value;
+    const returnDateTo = document.getElementById('returnDateTo').value;
+    const serviceFilter = document.getElementById('serviceFilter').value;
+    const orderIdFilter = document.getElementById('orderIdFilter').value.trim();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const staffFilter = document.getElementById('staffFilter').value;
+    
+    // Tạo đối tượng filter params
+    const filterParams = {
+        orderDateFrom,
+        orderDateTo,
+        returnDateFrom,
+        returnDateTo,
+        serviceFilter,
+        orderIdFilter,
+        statusFilter,
+        staffFilter
+    };
+    
+    // Lưu lại bộ lọc hiện tại để debug
+    lastFilterApplied = {...filterParams};
+    
+    addDebugMessage('Áp dụng bộ lọc và gửi đến server: ' + JSON.stringify(lastFilterApplied));
+    
+    // Hiển thị loading nhẹ khi lọc
+    document.getElementById('orderTableBody').innerHTML = '<tr><td colspan="11" class="text-center">Đang lấy dữ liệu từ server...</td></tr>';
+    document.getElementById('noOrdersMessage').style.display = 'none';
+    
+    // Đặt thời gian chờ tự động ẩn màn hình tải sau 20 giây
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+    }
+    loadingTimeout = setTimeout(function() {
+        hideLoading();
+        updateStatus('dataStatus', 'Timeout', 'error-text');
+        addDebugMessage('Timeout khi lọc dữ liệu sau 20 giây');
+        alert("Không nhận được phản hồi từ server sau 20 giây. Dữ liệu có thể quá lớn, hãy thu hẹp bộ lọc hoặc thử dùng dữ liệu mẫu.");
+    }, 20000);
+    
+    // Gửi yêu cầu đến server để lấy dữ liệu đã lọc
+    google.script.run
+        .withSuccessHandler(function(filteredData) {
+            clearTimeout(loadingTimeout);
+            hideLoading();
+            
+            if (!filteredData || filteredData.length === 0) {
+                // Không có dữ liệu phù hợp
+                filteredOrders = [];
+                allOrders = []; // Xóa dữ liệu cũ để tiết kiệm bộ nhớ
+                uniqueOrderIds = new Set();
+                
+                updateStatus('dataStatus', 'Không có dữ liệu phù hợp', 'warning-text');
+                addDebugMessage('Không có dữ liệu phù hợp với bộ lọc');
+                
+                // Cập nhật giao diện
+                document.getElementById('totalOrders').textContent = 0;
+                document.getElementById('noOrdersMessage').style.display = 'block';
+                document.getElementById('orderTableBody').innerHTML = '';
+                document.getElementById('pagination').innerHTML = '';
+            } else {
+                // Có dữ liệu phù hợp
+                filteredOrders = filteredData;
+                allOrders = filteredData; // Cho các chức năng khác sử dụng
+                
+                // Tính số lượng mã đơn duy nhất
+                uniqueOrderIds = new Set(filteredData.map(order => order.orderId));
+                
+                updateStatus('dataStatus', `${uniqueOrderIds.size} đơn hàng phù hợp`, 'success-text');
+                addDebugMessage(`Đã nhận ${filteredData.length} đơn hàng phù hợp, có ${uniqueOrderIds.size} mã đơn duy nhất`);
+                
+                // Trích xuất danh sách dịch vụ từ dữ liệu đã lọc
+                extractServiceList();
+                
+                // Cập nhật giao diện
+                showActiveFilters();
+                currentPage = 1;
+                updatePagination();
+                displayOrders();
+                
+                // Cập nhật thông tin tooltips nếu có chọn nhân viên
+                updateStaffInfoPanel(staffFilter);
+            }
+            
+            // Cập nhật thời gian cập nhật gần nhất
+            updateStatus('lastUpdated', getCurrentTime(), '');
+        })
+        .withFailureHandler(function(error) {
+            clearTimeout(loadingTimeout);
+            hideLoading();
+            
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            updateStatus('dataStatus', 'Lỗi lọc dữ liệu', 'error-text');
+            addDebugMessage('Lỗi khi lọc dữ liệu: ' + errorMessage);
+            
+            alert("Lỗi khi lọc dữ liệu: " + errorMessage + "\nVui lòng thử lại hoặc sử dụng bộ lọc đơn giản hơn.");
+        })
+        .getFilteredSheetData(filterParams);
+}
+// Hiển thị các bộ lọc đang hoạt động
+function showActiveFilters() {
+    const activeFiltersContainer = document.getElementById('activeFilters');
+    activeFiltersContainer.innerHTML = '';
+    
+    const filters = [];
+    
+    // Ngày nhận
+    const orderDateFrom = document.getElementById('orderDateFrom').value;
+    const orderDateTo = document.getElementById('orderDateTo').value;
+    if (orderDateFrom || orderDateTo) {
+        let dateText = 'Ngày nhận đơn: ';
+        if (orderDateFrom) dateText += 'từ ' + orderDateFrom;
+        if (orderDateFrom && orderDateTo) dateText += ' ';
+        if (orderDateTo) dateText += 'đến ' + orderDateTo;
+        filters.push(dateText);
+    }
+    
+    // Tình trạng
+    const statusFilter = document.getElementById('statusFilter').value;
+    if (statusFilter) {
+        filters.push('Tình trạng: ' + statusFilter);
+    }
+    
+    // Ngày trả
+    const returnDateFrom = document.getElementById('returnDateFrom').value;
+    const returnDateTo = document.getElementById('returnDateTo').value;
+    if (returnDateFrom || returnDateTo) {
+        let dateText = 'Ngày trả đơn: ';
+        if (returnDateFrom) dateText += 'từ ' + returnDateFrom;
+        if (returnDateFrom && returnDateTo) dateText += ' ';
+        if (returnDateTo) dateText += 'đến ' + returnDateTo;
+        filters.push(dateText);
+    }
+    
+    // Dịch vụ
+    const serviceFilter = document.getElementById('serviceFilter').value;
+    if (serviceFilter) {
+        filters.push('Dịch vụ: ' + serviceFilter);
+    }
+    
+    // Mã đơn hàng
+    const orderIdFilter = document.getElementById('orderIdFilter').value.trim();
+    if (orderIdFilter) {
+        filters.push('Mã đơn: ' + orderIdFilter);
+    }
+    
+    // Nhân viên
+    const staffFilter = document.getElementById('staffFilter').value;
+    if (staffFilter) {
+        filters.push('Nhân viên: ' + staffFilter);
+    }
+    
+    // Hiển thị các bộ lọc
+    if (filters.length > 0) {
+        filters.forEach(filter => {
+            const badge = document.createElement('span');
+            badge.className = 'filter-badge';
+            badge.innerHTML = filter + '<span class="close">×</span>';
+            
+            // Thêm sự kiện để xóa bộ lọc khi nhấp vào dấu x
+            badge.querySelector('.close').addEventListener('click', function() {
+                // Xóa bộ lọc tương ứng
+                if (filter.startsWith('Ngày nhận đơn')) {
+                    document.getElementById('orderDateFrom').value = '';
+                    document.getElementById('orderDateTo').value = '';
+                } else if (filter.startsWith('Ngày trả đơn')) {
+                    document.getElementById('returnDateFrom').value = '';
+                    document.getElementById('returnDateTo').value = '';
+                } else if (filter.startsWith('Dịch vụ')) {
+                    document.getElementById('serviceFilter').value = '';
+                } else if (filter.startsWith('Mã đơn')) {
+                    document.getElementById('orderIdFilter').value = '';
+                } else if (filter.startsWith('Tình trạng')) {
+                    document.getElementById('statusFilter').value = '';
+                } else if (filter.startsWith('Nhân viên')) {
+                    document.getElementById('staffFilter').value = '';
+                }
+                
+                // Áp dụng lại bộ lọc
+                applyFilters();
+            });
+            
+            activeFiltersContainer.appendChild(badge);
+        });
+    }
+}
+
+// Xóa tất cả các bộ lọc
+function clearFilters() {
+    document.getElementById('orderDateFrom').value = '';
+    document.getElementById('orderDateTo').value = '';
+    document.getElementById('returnDateFrom').value = '';
+    document.getElementById('returnDateTo').value = '';
+    document.getElementById('serviceFilter').value = '';
+    document.getElementById('orderIdFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('staffFilter').value = '';
+    
+
+// Ẩn panel thông tin nhân viên khi xóa bộ lọc
+document.getElementById('staffInfoPanel').style.display = 'none';
+    
+    addDebugMessage('Đã xóa tất cả bộ lọc');
+    applyFilters();
+}
+
+// ======== FUNCTIONS HIỂN THỊ ========
+
+// Hiển thị các đơn hàng
+function displayOrders() {
+    const tableBody = document.getElementById('orderTableBody');
+    const noOrdersMessage = document.getElementById('noOrdersMessage');
+    tableBody.innerHTML = '';
+    
+    document.getElementById('totalOrders').textContent = filteredOrders.length;
+    
+    // Hiển thị thông báo khi không có đơn hàng nào
+    if (filteredOrders.length === 0) {
+        noOrdersMessage.style.display = 'block';
+        return;
+    } else {
+        noOrdersMessage.style.display = 'none';
+    }
+    
+    // Tính toán chỉ số bắt đầu và kết thúc cho trang hiện tại
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredOrders.length);
+    
+    // Hiển thị đơn hàng cho trang hiện tại
+    for (let i = startIndex; i < endIndex; i++) {
+        const order = filteredOrders[i];
+        const row = document.createElement('tr');
+        row.className = 'highlight-row'; // Thêm lớp để tạo hiệu ứng
+        
+        // Mã đơn hàng
+        const orderIdCell = document.createElement('td');
+        orderIdCell.textContent = order.orderId;
+        row.appendChild(orderIdCell);
+        
+        // Khách hàng
+        const customerCell = document.createElement('td');
+        customerCell.textContent = order.customerName;
+        row.appendChild(customerCell);
+        
+        // Dịch vụ
+        const serviceCell = document.createElement('td');
+        if (order.services) {
+            const services = order.services.split('|').map(s => s.trim());
+            services.forEach(service => {
+                if (service) {
+                    const tag = document.createElement('span');
+                    tag.className = 'service-tag';
+                    tag.textContent = service;
+                    serviceCell.appendChild(tag);
+                    serviceCell.appendChild(document.createElement('br'));
+                }
+            });
+        }
+        row.appendChild(serviceCell);
+        
+        // Ngày nhận
+        const orderDateCell = document.createElement('td');
+        orderDateCell.textContent = order.orderDate;
+        row.appendChild(orderDateCell);
+        
+        // Ngày trả
+        const returnDateCell = document.createElement('td');
+        returnDateCell.textContent = order.returnDate;
+        row.appendChild(returnDateCell);
+        
+// Trạng thái
+const statusCell = document.createElement('td');
+const statusBadge = document.createElement('span');
+statusBadge.className = 'badge rounded-pill';
+
+if (order.orderStatus === 'Đang xử lý' || order.orderStatus === 'Đơn đang được xử lý' || order.orderStatus === 'Hoàn Thành,Chờ QC') {
+    statusBadge.className += ' badge-processing';
+} else if (order.orderStatus === 'Hoàn thành' || order.orderStatus === 'Qc Xong, Báo khách nhận sản phẩm') {
+    statusBadge.className += ' badge-completed';
+} else if (order.orderStatus === 'QC Duyệt Đơn' || order.orderStatus === 'Đơn Chưa Duyệt') {
+    statusBadge.className += ' badge-waiting';
+} else {
+    statusBadge.className += ' bg-secondary';
+}
+
+statusBadge.textContent = order.orderStatus || 'N/A';
+statusCell.appendChild(statusBadge);
+row.appendChild(statusCell);
+
+// Thêm các cột mới ở đây
+// Ghi chú Kỹ thuật (Cột Y)
+const techNoteCell = document.createElement('td');
+techNoteCell.textContent = order.techNote || '';
+techNoteCell.title = order.techNote || ''; // Hiển thị tooltip khi hover
+row.appendChild(techNoteCell);
+
+// Ghi chú Lễ tân (Cột Z)
+const receptionNoteCell = document.createElement('td');
+receptionNoteCell.textContent = order.receptionistNote || '';
+receptionNoteCell.title = order.receptionistNote || ''; // Hiển thị tooltip khi hover
+row.appendChild(receptionNoteCell);
+
+        
+        // Hình ảnh
+        const imageCell = document.createElement('td');
+        if (order.imageLink && typeof order.imageLink === 'string' && order.imageLink.trim() !== '') {
+            const trimmedLink = order.imageLink.trim();
+            // Tách các URL trong trường hợp có nhiều URL phân tách bởi "|"
+            const urls = trimmedLink.split('|').map(url => url.trim()).filter(url => url !== '');
+            let validUrl = null;
+
+            // Tìm URL đầu tiên hợp lệ bắt đầu bằng 'https://drive.google.com/uc?id='
+            for (const url of urls) {
+                if (url.startsWith('https://drive.google.com/uc?id=')) {
+                    validUrl = url;
+                    break;
+                }
+            }
+
+            if (validUrl) {
+                const img = document.createElement('img');
+                img.alt = 'Ảnh đơn hàng';
+                img.className = 'img-thumbnail img-thumbnail-preview';
+                img.style.width = '50px';
+                img.style.height = '50px';
+                let loadAttempts = 0;
+                const maxAttempts = 7; // Tăng số lần thử để xử lý lỗi mạng hoặc CORS
+
+                // Thử nhiều proxy và phương pháp tải, thêm Google Drive direct link khác
+                const proxyUrls = [
+                    'https://api.allorigins.win/raw?url=' + encodeURIComponent(validUrl), // Proxy khác
+                    'https://corsproxy.io/?' + encodeURIComponent(validUrl), // Proxy khác
+                    'https://images.weserv.nl/?url=' + encodeURIComponent(validUrl), // Proxy hình ảnh giúp xử lý CORS
+                    'https://crossorigin.me/' + encodeURIComponent(validUrl), // Proxy khác giúp xử lý CORS
+                    'https://thingproxy.freeboard.io/fetch/' + encodeURIComponent(validUrl), // Proxy khác giúp xử lý CORS
+                    'https://anywhere.proxy.cors.sh/?' + encodeURIComponent(validUrl) // Proxy mới giúp xử lý CORS
+                ];
+                const driveUrls = [
+                    validUrl + '&export=media', // Thử với export=media
+                    validUrl, // Thử URL gốc không tham số
+                    'https://drive.google.com/thumbnail?id=' + validUrl.split('id=')[1], // Thử thumbnail URL
+                    'https://lh3.googleusercontent.com/d/' + validUrl.split('id=')[1] + '=s100', // Thử URL Google Photos/Drive direct
+                    'https://drive.google.com/file/d/' + validUrl.split('id=')[1] + '/view?usp=sharing' // Thử URL chia sẻ trực tiếp
+                ];
+
+                function loadImage(url) {
+                    img.src = url;
+                    img.onload = function() { // Xử lý khi hình ảnh tải thành công
+                        this.style.display = 'block';
+                    };
+                    img.onerror = function() { // Fallback nếu hình ảnh không tải được
+                        loadAttempts++;
+                        if (loadAttempts < maxAttempts) {
+                            // Thử các proxy hoặc URL Google Drive lần lượt
+                            if (loadAttempts <= proxyUrls.length) {
+                                loadImage(proxyUrls[loadAttempts - 1]);
+                            } else {
+                                loadImage(driveUrls[loadAttempts - proxyUrls.length - 1]);
+                            }
+                        } else {
+                            this.style.display = 'none';
+                            const placeholder = document.createElement('span');
+                            placeholder.textContent = 'Không tải được ảnh';
+                            placeholder.className = 'text-muted';
+                            placeholder.title = 'URL: ' + validUrl; // Hiển thị URL khi hover để debug
+                            imageCell.appendChild(placeholder);
+                            addDebugMessage('Không tải được hình ảnh cho đơn ' + order.orderId + ': ' + validUrl);
+                        }
+                    };
+                }
+
+                // Bắt đầu tải với URL gốc
+                loadImage(driveUrls[0]); // Bắt đầu với driveUrl có export=media
+
+                img.addEventListener('click', function() {
+                    showImagePreview(validUrl, order.orderId);
+                });
+                imageCell.appendChild(img);
+            } else {
+                const placeholder = document.createElement('span');
+                placeholder.textContent = 'URL không hợp lệ';
+                placeholder.className = 'text-muted';
+                placeholder.title = 'URL: ' + trimmedLink; // Hiển thị toàn bộ chuỗi URL khi hover để debug
+                imageCell.appendChild(placeholder);
+                addDebugMessage('URL hình ảnh không hợp lệ cho đơn ' + order.orderId + ': ' + trimmedLink);
+            }
+        } else {
+            const placeholder = document.createElement('span');
+            placeholder.textContent = 'Không có ảnh';
+            placeholder.className = 'text-muted';
+            imageCell.appendChild(placeholder);
+        }
+        row.appendChild(imageCell);
+
+// Phân đơn
+const assignCell = document.createElement('td');
+const assignButton = document.createElement('button');
+assignButton.className = 'btn btn-primary btn-sm';
+assignButton.innerHTML = '<i class="bi bi-person-plus-fill"></i>';
+assignButton.title = 'Phân đơn';
+assignButton.addEventListener('click', function() {
+    openAssignModal(order);
+});
+assignCell.appendChild(assignButton);
+row.appendChild(assignCell);
+
+// Thêm cột Người làm & Dịch vụ
+const assigneeServiceCell = document.createElement('td');
+let assigneeServiceHtml = '';
+
+// Tạo danh sách người làm + dịch vụ
+if (order.service1 && order.assignee1) {
+    assigneeServiceHtml += `<div class="small"><b>${order.assignee1}</b>: ${order.service1}</div>`;
+}
+if (order.service2 && order.assignee2) {
+    assigneeServiceHtml += `<div class="small"><b>${order.assignee2}</b>: ${order.service2}</div>`;
+}
+if (order.service3 && order.assignee3) {
+    assigneeServiceHtml += `<div class="small"><b>${order.assignee3}</b>: ${order.service3}</div>`;
+}
+
+if (assigneeServiceHtml === '') {
+    assigneeServiceHtml = '<span class="text-muted small">Chưa phân công</span>';
+}
+
+assigneeServiceCell.innerHTML = assigneeServiceHtml;
+row.appendChild(assigneeServiceCell);
+
+tableBody.appendChild(row);
+    }
+}
+
+// Cập nhật phân trang
+function updatePagination() {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    
+    // Tính toán tổng số trang
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    
+    // Nếu không có trang nào, không làm gì
+    if (totalPages === 0) {
+        return;
+    }
+    
+    // Tạo nút "Trước"
+    const prevLi = document.createElement('li');
+    prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+    const prevLink = document.createElement('a');
+    prevLink.className = 'page-link';
+    prevLink.href = '#';
+    prevLink.textContent = 'Trước';
+    prevLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            updatePagination();
+            displayOrders();
+        }
+    });
+    prevLi.appendChild(prevLink);
+    pagination.appendChild(prevLi);
+    
+    // Tạo các nút số trang
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+    
+    if (endPage - startPage < 4 && startPage > 1) {
+        startPage = Math.max(1, endPage - 4);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageLi = document.createElement('li');
+        pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
+        const pageLink = document.createElement('a');
+        pageLink.className = 'page-link';
+        pageLink.href = '#';
+        pageLink.textContent = i;
+        pageLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentPage = i;
+            updatePagination();
+            displayOrders();
+        });
+        pageLi.appendChild(pageLink);
+        pagination.appendChild(pageLi);
+    }
+    
+    // Tạo nút "Sau"
+    const nextLi = document.createElement('li');
+    nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+    const nextLink = document.createElement('a');
+    nextLink.className = 'page-link';
+    nextLink.href = '#';
+    nextLink.textContent = 'Sau';
+    nextLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePagination();
+            displayOrders();
+        }
+    });
+    nextLi.appendChild(nextLink);
+    pagination.appendChild(nextLi);
+}
+
+// ======== FUNCTIONS PHÂN ĐƠN ========
+
+// Mở modal phân đơn
+function openAssignModal(order) {
+    try {
+        // Đảm bảo ẩn overlay trước
+        hideLoading();
+        
+        // Đặt lại z-index cho modal
+        const modalElement = document.getElementById('assignOrderModal');
+        if (modalElement) {
+            modalElement.style.zIndex = "2000";
+        }
+        
+        // Cập nhật thông tin đơn hàng
+        document.getElementById('modalOrderId').textContent = order.orderId;
+        document.getElementById('modalCustomerName').textContent = order.customerName;
+        document.getElementById('modalOrderDate').textContent = order.orderDate;
+        document.getElementById('modalReturnDate').textContent = order.returnDate;
+        document.getElementById('modalCustomerNote').textContent = order.customerNote || 'Không có';
+        document.getElementById('modalReceptionistNote').textContent = order.receptionistNote || 'Không có';
+        document.getElementById('rowIndex').value = order.rowIndex;
+        document.getElementById('qcCheckbox').checked = order.qualityCheck || false;
+        
+        addDebugMessage('Mở modal phân đơn cho đơn hàng: ' + order.orderId);
+        
+        // Cập nhật danh sách dịch vụ
+        const serviceListContainer = document.getElementById('modalServiceList');
+        serviceListContainer.innerHTML = '';
+        
+        if (order.services) {
+            const services = order.services.split('|').map(s => s.trim());
+            services.forEach(service => {
+                if (service) {
+                    const serviceItem = document.createElement('div');
+                    serviceItem.className = 'service-tag';
+                    serviceItem.textContent = service;
+                    serviceListContainer.appendChild(serviceItem);
+                }
+            });
+        } else {
+            serviceListContainer.textContent = 'Không có dịch vụ';
+        }
+        
+        // Cập nhật danh sách dịch vụ trong dropdown
+        updateServiceDropdowns(order.services);
+        
+        // Đặt giá trị cho các trường
+        document.getElementById('assignmentDate').value = order.assignmentDate || formatDate(new Date());
+        document.getElementById('qcNote').value = order.qcNote || '';
+        document.getElementById('service1').value = order.service1 || '';
+        document.getElementById('assignee1').value = order.assignee1 || '';
+        document.getElementById('service2').value = order.service2 || '';
+        document.getElementById('assignee2').value = order.assignee2 || '';
+        document.getElementById('service3').value = order.service3 || '';
+        document.getElementById('assignee3').value = order.assignee3 || '';
+        document.getElementById('completionDate').value = order.completionDate || '';
+        
+        // Hiển thị modal
+        const modalInstance = new bootstrap.Modal(document.getElementById('assignOrderModal'));
+        modalInstance.show();
+    } catch (e) {
+        console.error('Lỗi khi mở modal phân đơn:', e);
+        addDebugMessage('Lỗi khi mở modal phân đơn: ' + e.toString());
+        alert('Có lỗi khi mở cửa sổ phân đơn: ' + e.message);
+    }
+}
+
+
+// Cập nhật danh sách dịch vụ trong dropdown
+function updateServiceDropdowns(servicesString) {
+    try {
+        const service1Dropdown = document.getElementById('service1');
+        const service2Dropdown = document.getElementById('service2');
+        const service3Dropdown = document.getElementById('service3');
+        
+        if (!service1Dropdown || !service2Dropdown || !service3Dropdown) {
+            console.error('Không tìm thấy một hoặc nhiều dropdown dịch vụ');
+            addDebugMessage('Lỗi: Không tìm thấy một hoặc nhiều dropdown dịch vụ');
+            return;
+        }
+        
+        // Lưu giá trị đã chọn
+        const service1Value = service1Dropdown.value;
+        const service2Value = service2Dropdown.value;
+        const service3Value = service3Dropdown.value;
+        
+        // Đặt lại danh sách dropdown
+        service1Dropdown.innerHTML = '<option value="">Chọn dịch vụ</option>';
+        service2Dropdown.innerHTML = '<option value="">Chọn dịch vụ</option>';
+        service3Dropdown.innerHTML = '<option value="">Chọn dịch vụ</option>';
+        
+        // Thêm các dịch vụ từ đơn hàng
+        if (servicesString) {
+            const services = servicesString.split('|').map(s => s.trim());
+            
+            services.forEach(service => {
+                if (service) {
+                    const option1 = document.createElement('option');
+                    option1.value = service;
+                    option1.textContent = service;
+                    service1Dropdown.appendChild(option1);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = service;
+                    option2.textContent = service;
+                    service2Dropdown.appendChild(option2);
+                    
+                    const option3 = document.createElement('option');
+                    option3.value = service;
+                    option3.textContent = service;
+                    service3Dropdown.appendChild(option3);
+                }
+            });
+            
+            // Khôi phục giá trị đã chọn nếu có
+            if (service1Value) service1Dropdown.value = service1Value;
+            if (service2Value) service2Dropdown.value = service2Value;
+            if (service3Value) service3Dropdown.value = service3Value;
+        }
+        
+        addDebugMessage('Đã cập nhật danh sách dịch vụ trong modal phân đơn');
+    } catch (e) {
+        console.error('Lỗi khi cập nhật dropdown dịch vụ:', e);
+        addDebugMessage('Lỗi khi cập nhật dropdown dịch vụ: ' + e.toString());
+    }
+}
+// Lưu thông tin phân đơn
+function saveAssignment() {
+    showLoading('Đang lưu thông tin phân đơn...');
+    
+    const rowIndex = document.getElementById('rowIndex').value;
+    const assignmentDate = document.getElementById('assignmentDate').value;
+    const qcNote = document.getElementById('qcNote').value;
+    const service1 = document.getElementById('service1').value;
+    const assignee1 = document.getElementById('assignee1').value;
+    const service2 = document.getElementById('service2').value;
+    const assignee2 = document.getElementById('assignee2').value;
+    const service3 = document.getElementById('service3').value;
+    const assignee3 = document.getElementById('assignee3').value;
+    const completionDate = document.getElementById('completionDate').value;
+    const isQcCompleted = document.getElementById('qcCheckbox').checked;
+        // Lưu trạng thái các bộ lọc trước khi tải lại dữ liệu
+    savedFilters.serviceFilter = document.getElementById('serviceFilter').value;
+    savedFilters.statusFilter = document.getElementById('statusFilter').value;
+    savedFilters.staffFilter = document.getElementById('staffFilter').value;
+    // Kiểm tra dữ liệu
+    if (!assignmentDate) {
+        alert('Vui lòng nhập ngày phân đơn');
+        hideLoading();
+        return;
+    }
+    
+    // Chuẩn bị dữ liệu để gửi đến server
+    const data = {
+    qcNote,
+    assignmentDate,
+    service1,
+    assignee1,
+    service2,
+    assignee2,
+    service3,
+    assignee3,
+    completionDate,
+    qualityCheck: isQcCompleted // Thêm trường này
+    };
+    
+    addDebugMessage('Lưu thông tin phân đơn cho dòng ' + rowIndex + ': ' + JSON.stringify(data));
+    
+    // Trong chế độ thử nghiệm, giả lập cập nhật thành công
+    if (isUsingTestData) {
+        setTimeout(function() {
+            // Cập nhật dữ liệu cục bộ
+            const orderIndex = allOrders.findIndex(order => order.rowIndex == rowIndex);
+            if (orderIndex !== -1) {
+                allOrders[orderIndex] = { ...allOrders[orderIndex], ...data };
+                addDebugMessage('Đã cập nhật cục bộ dữ liệu đơn hàng ở chế độ thử nghiệm');
+            }
+            
+            // Ẩn modal và làm mới dữ liệu
+            assignOrderModal.hide();
+            alert("Cập nhật thành công (Chế độ thử nghiệm)");
+            applyFilters(); // Áp dụng lại bộ lọc để hiển thị các thay đổi
+            hideLoading();
+        }, 1000);
+        return;
+    }
+    
+    // Đặt thời gian chờ tự động ẩn màn hình tải sau 10 giây
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+    }
+    loadingTimeout = setTimeout(function() {
+        hideLoading();
+        alert("Không nhận được phản hồi khi lưu sau 10 giây. Vui lòng thử lại.");
+    }, 10000);
+    
+    // Gửi dữ liệu đến server
+    google.script.run
+        .withSuccessHandler(function(response) {
+            clearTimeout(loadingTimeout);
+            
+            addDebugMessage('Kết quả lưu: ' + JSON.stringify(response));
+            
+            // Ẩn modal và làm mới dữ liệu
+            assignOrderModal.hide();
+            alert(response.message);
+            fetchData(); // Làm mới dữ liệu
+        })
+        .withFailureHandler(function(error) {
+            clearTimeout(loadingTimeout);
+            
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            addDebugMessage('Lỗi khi lưu: ' + errorMessage);
+            console.error('Lỗi lưu phân công:', error);
+            alert('Không thể lưu thông tin phân đơn: ' + errorMessage);
+            hideLoading();
+        })
+        .updateAssignment(rowIndex, data);
+}
+
+// Hiển thị xem trước hình ảnh
+// Hiển thị xem trước hình ảnh
+function showImagePreview(imageUrl, orderId) {
+    try {
+        if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+            const trimmedLink = imageUrl.trim();
+            if (trimmedLink.startsWith('https://drive.google.com/uc?id=')) {
+                const previewImage = document.getElementById('previewImage');
+                // Đặt lại góc xoay về 0 khi mở ảnh mới
+                rotationAngle = 0;
+                previewImage.style.transform = 'rotate(0deg)';
+                
+                let loadAttempts = 0;
+                const maxAttempts = 5; // Số lần thử để xử lý lỗi CORS hoặc tải
+
+                // Thử nhiều proxy và phương pháp tải, giống displayOrders
+                const proxyUrls = [
+                    'https://api.allorigins.win/raw?url=' + encodeURIComponent(trimmedLink), // Proxy khác
+                    'https://corsproxy.io/?' + encodeURIComponent(trimmedLink), // Proxy khác
+                    'https://images.weserv.nl/?url=' + encodeURIComponent(trimmedLink), // Proxy hình ảnh giúp xử lý CORS
+                    'https://crossorigin.me/' + encodeURIComponent(trimmedLink), // Proxy khác giúp xử lý CORS
+                    'https://thingproxy.freeboard.io/fetch/' + encodeURIComponent(trimmedLink) // Proxy khác giúp xử lý CORS
+                ];
+                const driveUrls = [
+                    trimmedLink + '&export=media', // Thử với export=media
+                    trimmedLink, // Thử URL gốc không tham số
+                    'https://drive.google.com/thumbnail?id=' + trimmedLink.split('id=')[1] // Thử thumbnail URL
+                ];
+
+                function loadPreview(url) {
+                    previewImage.src = url;
+                    previewImage.style.transform = `rotate(${rotationAngle}deg)`; // Áp dụng góc xoay hiện tại
+                    previewImage.onload = function() { // Xử lý khi hình ảnh tải thành công
+                        imagePreviewModal.show();
+                    };
+                    previewImage.onerror = function() { // Fallback nếu hình ảnh không tải được
+                        loadAttempts++;
+                        if (loadAttempts < maxAttempts) {
+                            // Thử các proxy hoặc URL Google Drive lần lượt
+                            if (loadAttempts <= proxyUrls.length) {
+                                loadPreview(proxyUrls[loadAttempts - 1]);
+                            } else {
+                                loadPreview(driveUrls[loadAttempts - proxyUrls.length - 1]);
+                            }
+                        } else {
+                            this.alt = 'Không tải được hình ảnh';
+                            imagePreviewModal.show(); // Hiển thị modal với thông báo lỗi
+                            alert('Không thể tải hình ảnh: ' + trimmedLink);
+                            addDebugMessage('Không tải được hình ảnh trong modal cho đơn ' + orderId + ': ' + trimmedLink);
+                        }
+                    };
+                }
+
+                // Bắt đầu tải với URL gốc
+                loadPreview(driveUrls[0]); // Bắt đầu với driveUrl có export=media
+            } else {
+                alert('URL hình ảnh không hợp lệ: ' + trimmedLink);
+                addDebugMessage('URL hình ảnh không hợp lệ trong modal: ' + trimmedLink);
+            }
+        } else {
+            alert('Không có URL hình ảnh để hiển thị.');
+        }
+    } catch (error) {
+        console.error('Lỗi trong showImagePreview:', error);
+        addDebugMessage('Lỗi trong showImagePreview: ' + error.message);
+        alert('Đã xảy ra lỗi khi tải hình ảnh. Vui lòng thử lại.');
+    }
+}
+// ======== FUNCTIONS TIỆN ÍCH ========
+
+// Cập nhật trạng thái trong thanh trạng thái
+function updateStatus(id, message, className) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = message;
+        element.className = className || '';
+    }
+}
+
+// Hiển thị overlay tải
+function showLoading(message = 'Đang tải...') {
+    document.getElementById('loadingMessage').textContent = message;
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+// Ẩn overlay tải
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// Kiểm tra xem một ngày có sau hoặc bằng ngày khác không
+function isDateAfterOrEqual(dateStr1, dateStr2) {
+    if (!dateStr1 || !dateStr2) return true;
+    
+    const date1 = parseDate(dateStr1);
+    const date2 = parseDate(dateStr2);
+    
+    if (!date1 || !date2) return true;
+    
+    return date1 >= date2;
+}
+
+// Kiểm tra xem một ngày có trước hoặc bằng ngày khác không
+function isDateBeforeOrEqual(dateStr1, dateStr2) {
+    if (!dateStr1 || !dateStr2) return true;
+    
+    const date1 = parseDate(dateStr1);
+    const date2 = parseDate(dateStr2);
+    
+    if (!date1 || !date2) return true;
+    
+    return date1 <= date2;
+}
+
+// Chuyển đổi chuỗi ngày thành đối tượng Date
+function parseDate(dateStr) {
+    // Hỗ trợ định dạng: dd/mm/yyyy
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Tháng trong JS từ 0-11
+        const year = parseInt(parts[2], 10);
+        
+        return new Date(year, month, day);
+    }
+    return null;
+}
+
+// Định dạng đối tượng Date thành chuỗi ngày
+function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+}
+
+// Lấy thời gian hiện tại dưới dạng chuỗi
+function getCurrentTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    return `${formatDate(now)} ${hours}:${minutes}:${seconds}`;
+}
+// Hàm cập nhật bộ lọc nhân viên
+function updateStaffFilter() {
+    try {
+        const staffFilter = document.getElementById('staffFilter');
+        if (!staffFilter) {
+            console.error('Không tìm thấy element staffFilter');
+            addDebugMessage('Lỗi: Không tìm thấy element staffFilter');
+            return;
+        }
+        
+        // Lưu giá trị đã chọn
+        const selectedValue = staffFilter.value;
+        
+        // Xóa tất cả các option hiện tại, chỉ giữ lại option đầu tiên (Tất cả nhân viên)
+        while (staffFilter.options.length > 1) {
+            staffFilter.remove(1);
+        }
+        
+        // Sử dụng danh sách nhân viên đã có sẵn
+        if (staffList && staffList.length > 0) {
+            staffList.forEach(staff => {
+                if (staff) {
+                    const option = document.createElement('option');
+                    option.value = staff;
+                    option.textContent = staff;
+                    staffFilter.appendChild(option);
+                }
+            });
+            
+            // Khôi phục giá trị đã chọn nếu có
+            if (selectedValue) {
+                staffFilter.value = selectedValue;
+            }
+            
+            addDebugMessage(`Đã cập nhật ${staffList.length} nhân viên trong bộ lọc`);
+        } else {
+            // Trường hợp không có dữ liệu nhân viên
+            const defaultStaff = ["Nhân viên A", "Nhân viên B", "Nhân viên C", "Nhân viên X", "Nhân viên Y", "Nhân viên Z"];
+            defaultStaff.forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff;
+                option.textContent = staff;
+                staffFilter.appendChild(option);
+            });
+            
+            addDebugMessage('Đã sử dụng dữ liệu nhân viên mặc định cho bộ lọc');
+        }
+    } catch (e) {
+        console.error('Lỗi trong updateStaffFilter:', e);
+        addDebugMessage('Lỗi trong updateStaffFilter: ' + e.toString());
+    }
+}
+
+// Thêm thông báo debug
+function addDebugMessage(message) {
+    const debugContainer = document.getElementById('debugMessages');
+    if (!debugContainer) return;
+    
+    const messageElement = document.createElement('div');
+    messageElement.className = 'debug-message';
+    
+    const timestamp = document.createElement('span');
+    timestamp.className = 'debug-timestamp';
+    timestamp.textContent = getCurrentTime() + ': ';
+    
+    messageElement.appendChild(timestamp);
+    messageElement.appendChild(document.createTextNode(message));
+    
+    debugContainer.appendChild(messageElement);
+    
+    // Tự động cuộn xuống để luôn hiển thị thông báo mới nhất
+    debugContainer.scrollTop = debugContainer.scrollHeight;
+}
+</script>
+<script>
+// Kiểm tra và khởi tạo tab mới khi trang đã tải xong
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - checking tabs');
+    
+    // Kiểm tra tab thủ công
+    setTimeout(function() {
+        try {
+            const scheduleTab = document.getElementById('schedule-tab');
+            const scheduleContent = document.getElementById('schedule-content');
+            
+            console.log('Tab elements:', {
+                scheduleTab: scheduleTab,
+                scheduleContent: scheduleContent
+            });
+            
+            if (scheduleTab && scheduleContent) {
+                console.log('Attempting to initialize schedule tab manually');
+                
+                // Kiểm tra xem tab đã được khởi tạo với Bootstrap chưa
+                const bsTab = bootstrap.Tab.getInstance(scheduleTab);
+                
+                if (!bsTab) {
+                    console.log('Creating new Tab instance');
+                    new bootstrap.Tab(scheduleTab);
+                }
+                
+                // Cố gắng khởi tạo chức năng quản lý lịch
+                if (typeof initScheduleManagement === 'function') {
+                    console.log('Initializing schedule management');
+                    initScheduleManagement();
+                } else {
+                    console.error('initScheduleManagement function not found');
+                }
+            }
+        } catch (e) {
+            console.error('Error initializing tabs manually:', e);
+        }
+    }, 2000); // Chờ 2 giây sau khi trang tải xong
+});
+// Cơ chế hỗ trợ tải tab
+window.addEventListener('load', function() {
+    console.log('Tải trang hoàn tất - kiểm tra tab mặc định');
+    
+    // Đợi 500ms để đảm bảo mọi thứ đã sẵn sàng
+    setTimeout(function() {
+        // Kiểm tra tab hiện tại để hiển thị đúng
+        if (window.scheduleTab && window.scheduleTab.classList.contains('active')) {
+            console.log('Tab Chia Lịch đang active - kích hoạt');
+            if (typeof window.showScheduleTab === 'function') {
+                window.showScheduleTab();
+            }
+        } else if (window.ordersTab) {
+            console.log('Tab Phân Đơn đang active - kích hoạt');
+            if (typeof window.showOrdersTab === 'function') {
+                window.showOrdersTab();
+            }
+        }
+    }, 500);
+});
+<!-- Nút khẩn cấp khôi phục tab -->
+<div id="emergencyTabFix" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: none;">
+    <button onclick="forceFixTab()" class="btn btn-danger btn-sm">
+        <i class="bi bi-exclamation-triangle"></i> Khôi phục Tab
+    </button>
+</div>
+
+<script>
+function forceFixTab() {
+    try {
+        console.log('Đang thực hiện khôi phục khẩn cấp tab...');
+        
+        // Hiển thị tab Chia Lịch với force render
+        if (typeof window.showScheduleTab === 'function') {
+            window.showScheduleTab(true);
+        }
+        
+        // Trực tiếp thay đổi DOM để hiển thị tab content
+        const scheduleContent = document.getElementById('schedule-content');
+        if (scheduleContent) {
+            scheduleContent.setAttribute("style", "display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 999 !important;");
+            
+            // Thêm lại các phần tử quan trọng nếu bị mất
+            const tableContainer = scheduleContent.querySelector('.table-responsive');
+            if (tableContainer && !tableContainer.innerHTML.trim()) {
+                tableContainer.innerHTML = `
+                <table class="table table-bordered table-hover" id="scheduleTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="20%">Nhân Viên Đăng Ký</th>
+                            <th width="15%">Ngày</th>
+                            <th width="15%">Ca Làm</th>
+                            <th width="20%">Phân Công Cho</th>
+                            <th width="20%">Ghi Chú</th>
+                            <th width="5%">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center">Vui lòng chọn tuần và tải dữ liệu</td>
+                        </tr>
+                    </tbody>
+                </table>`;
+            }
+        }
+        
+        // Thử khởi tạo lại
+        if (typeof initScheduleManagement === 'function') {
+            window._scheduleInitialized = false;
+            initScheduleManagement();
+        }
+        
+        alert('Đã thực hiện khôi phục tab. Hãy kiểm tra lại tab Chia Lịch.');
+    } catch (e) {
+        console.error('Lỗi khi khôi phục tab:', e);
+        alert('Không thể khôi phục tab: ' + e.message);
+    }
+}
+
+// Hiển thị nút khẩn cấp sau 5 giây
+setTimeout(function() {
+    const emergencyBtn = document.getElementById('emergencyTabFix');
+    if (emergencyBtn) emergencyBtn.style.display = 'block';
+}, 5000);
+// Đảm bảo tab hoạt động đúng
+document.addEventListener('DOMContentLoaded', function() {
+    // Cố định các tab hiện tại
+    const appTabs = document.getElementById('appTabs');
+    if (appTabs) {
+        const tabLinks = appTabs.querySelectorAll('[data-bs-toggle="tab"]');
+        tabLinks.forEach(function(tabLink) {
+            tabLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-bs-target');
+                const targetPane = document.querySelector(targetId);
+                
+                // Xử lý kích hoạt tab
+                tabLinks.forEach(link => link.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Xử lý hiển thị nội dung tab
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active', 'show');
+                    pane.style.display = 'none';
+                });
+                
+                if (targetPane) {
+                    targetPane.classList.add('active', 'show');
+                    targetPane.style.display = 'block';
+                    
+                    // Khởi tạo lại nếu cần
+                    if (targetId === '#schedule-content' && typeof initScheduleManagement === 'function') {
+                        setTimeout(function() {
+                            try {
+                                window._scheduleInitialized = false;
+                                initScheduleManagement();
+                            } catch (e) {
+                                console.error('Lỗi khởi tạo schedule management:', e);
+                            }
+                        }, 300);
+                    }
+                }
+            });
+        });
+    }
+});
+</script>
