@@ -1,0 +1,3376 @@
+<div class="card-header bg-primary text-white">
+    <h4 class="mb-0"><i class="bi bi-calendar3"></i> Quản Lý Lịch Làm Việc</h4>
+</div>
+<div class="card-body">
+    <!-- Sub-tabs cho Kỹ thuật và Lễ tân -->
+    <ul class="nav nav-tabs mb-3" id="scheduleTypeTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="technician-tab" data-bs-toggle="tab" data-bs-target="#technician-content" 
+                    type="button" role="tab" aria-controls="technician-content" aria-selected="true">
+                <i class="bi bi-tools"></i> Kỹ thuật
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reception-tab" data-bs-toggle="tab" data-bs-target="#reception-content" 
+                    type="button" role="tab" aria-controls="reception-content" aria-selected="false">
+                <i class="bi bi-person-badge"></i> Lễ tân
+            </button>
+        </li>
+    </ul>
+
+    <!-- Nội dung các tab -->
+    <div class="tab-content" id="scheduleTypeContent">
+        <!-- Tab Kỹ thuật -->
+        <div class="tab-pane fade show active" id="technician-content" role="tabpanel" aria-labelledby="technician-tab">
+            <div class="alert alert-info alert-dismissible fade show mb-3" id="scheduleConnectionStatus">
+                <strong>Thông tin!</strong> Đang kiểm tra kết nối đến dữ liệu lịch làm việc...
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <!-- Phần bộ lọc theo tuần -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">Chọn ngày</span>
+                        <input type="text" class="form-control" id="scheduleWeekPicker" placeholder="Chọn một ngày trong tuần">
+                        <button class="btn btn-primary" id="loadScheduleBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Tải Dữ Liệu Theo Tuần
+                        </button>
+                        <button class="btn btn-success" id="getTechnicianDataBtn">
+                            <i class="bi bi-cloud-download"></i> Get Data
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="alert alert-info d-inline-block mb-0 p-2">
+                        <span id="scheduleWeekRange">Tuần hiện tại</span>
+                    </div>
+                    <button class="btn btn-warning ms-2" id="checkSheetBtn">
+                        <i class="bi bi-file-check"></i> Kiểm Tra Sheet
+                    </button>
+                    <button class="btn btn-info ms-2" id="testConnectionBtn">
+    <i class="bi bi-database-check"></i> Test Connection
+</button>
+                </div>
+            </div>
+
+            <!-- Bảng lịch làm việc -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="scheduleTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="20%">Nhân Viên Đăng Ký</th>
+                            <th width="15%">Ngày</th>
+                            <th width="15%">Ca Làm</th>
+                            <th width="20%">Phân Công Cho</th>
+                            <th width="20%">Ghi Chú</th>
+                            <th width="5%">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center">Vui lòng chọn tuần và tải dữ liệu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Thông báo không có dữ liệu -->
+            <div id="noScheduleMessage" class="alert alert-warning text-center" style="display: none;">
+                Không tìm thấy lịch làm việc nào trong khoảng thời gian đã chọn.
+            </div>
+
+            <!-- Nút lưu phân công -->
+            <div class="text-end mt-3">
+                <button class="btn btn-success" id="saveScheduleAssignmentBtn" disabled>
+                    <i class="bi bi-save"></i> Lưu Phân Công
+                </button>
+            </div>
+        </div>
+
+        
+        <!-- Tab Lễ tân -->
+        <div class="tab-pane fade" id="reception-content" role="tabpanel" aria-labelledby="reception-tab">
+            <!-- Alert thông báo trạng thái kết nối -->
+            <div class="alert alert-info alert-dismissible fade show mb-3" id="receptionConnectionStatus">
+                <strong>Thông tin!</strong> Đang kiểm tra kết nối đến dữ liệu lịch làm việc lễ tân...
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <!-- Phần bộ lọc theo tuần -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text">Chọn ngày</span>
+            <input type="text" class="form-control" id="receptionWeekPicker" placeholder="Chọn một ngày trong tuần">
+            <button class="btn btn-primary" id="loadReceptionBtn">
+                <i class="bi bi-arrow-clockwise"></i> Tải Dữ Liệu Theo Tuần
+            </button>
+                <button class="btn btn-success" id="getReceptionDataBtn">
+              <i class="bi bi-cloud-download"></i> Get Data
+            </button>
+        </div>
+    </div>
+    <div class="col-md-6 text-end">
+        <div class="alert alert-info d-inline-block mb-0 p-2">
+            <span id="receptionWeekRange">Tuần hiện tại</span>
+        </div>
+        <button class="btn btn-danger ms-2" id="clearReceptionScheduleBtn">
+            <i class="bi bi-trash"></i> Xóa Lịch Hiện Tại
+        </button>
+    </div>
+</div>
+<div class="card mb-3">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Thống Kê Lịch Làm Việc</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Tổng số đăng ký</h5>
+                        <h2 id="totalRegistrations">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Đã phân công</h5>
+                        <h2 id="totalAssigned">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Chưa phân công</h5>
+                        <h2 id="totalUnassigned">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Danh sách nhân viên có thể phân công -->
+<div class="card mb-3">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-people-fill"></i> Nhân Viên Có Thể Phân Công</h5>
+    </div>
+    <div class="card-body">
+        <div class="row" id="availableStaffOverview">
+            <!-- Danh sách nhân viên sẽ hiển thị ở đây -->
+        </div>
+    </div>
+</div>
+            <!-- Bảng lịch cửa hàng Ba Đình -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Cửa hàng Ba Đình</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="baDinhScheduleTable">
+                            <thead class="table-light">
+                                <tr id="baDinhTableHeader">
+                                    <th width="10%">Ca làm</th>
+                                    <!-- Các cột thứ 2-CN sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Ca sáng</th>
+                                    <!-- Các ô sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                                <tr>
+                                    <th>Ca chiều</th>
+                                    <!-- Các ô sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                                <tr>
+                                    <th>Ca tối</th>
+                                    <!-- Các ô sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bảng lịch cửa hàng Phan Thanh -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Cửa hàng Phan Thanh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="phanThanhScheduleTable">
+                            <thead class="table-light">
+                                <tr id="phanThanhTableHeader">
+                                    <th width="10%">Ca làm</th>
+                                    <!-- Các cột thứ 2-CN sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Ca sáng</th>
+                                    <!-- Các ô sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                                <tr>
+                                    <th>Ca chiều</th>
+                                    <!-- Các ô sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                                <tr>
+                                    <th>Ca tối</th>
+                                    <!-- Các ô sẽ được thêm động bằng JavaScript -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông báo không có dữ liệu -->
+            <div id="noReceptionMessage" class="alert alert-warning text-center" style="display: none;">
+                Không tìm thấy lịch làm việc nào trong khoảng thời gian đã chọn.
+            </div>
+
+            <!-- Nút lưu phân công -->
+            <div class="text-end mt-3">
+                <button class="btn btn-success" id="saveReceptionAssignmentBtn" disabled>
+                    <i class="bi bi-save"></i> Lưu Phân Công
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal chọn nhân viên -->
+<div class="modal fade" id="staffSelectionModal" tabindex="-1" aria-labelledby="staffSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staffSelectionModalLabel">Chọn nhân viên phân công</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div><strong>Cửa hàng:</strong> <span id="modalStore"></span></div>
+                    <div><strong>Ngày:</strong> <span id="modalDate"></span></div>
+                    <div><strong>Ca làm:</strong> <span id="modalShift"></span></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="staffSearch" class="form-label">Tìm nhân viên:</label>
+                    <input type="text" class="form-control" id="staffSearch" placeholder="Nhập tên nhân viên...">
+                </div>
+                
+                <div id="availableStaffList">
+                    <!-- Danh sách nhân viên có thể phân công sẽ được thêm động bằng JavaScript -->
+                </div>
+                
+                <div id="noAvailableStaff" class="alert alert-warning" style="display: none;">
+                    Không có nhân viên nào có thể phân công vào ca này.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmStaffSelection">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+  .staff-chip {
+    display: inline-block;
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.staff-chip:hover {
+    background-color: #d1eaff;
+}
+.staff-chip.active {
+    background-color: #007bff;
+    color: white;
+}
+.staff-chip .badge {
+    margin-left: 5px;
+}
+  /* CSS đảm bảo hiển thị các phần tử trong bảng */
+  /* Cải thiện UI cho modal chọn nhân viên */
+  .staff-option.selected {
+    background-color: #007bff !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-left: 4px solid #0056b3 !important;
+}
+#staffSelectionModal .modal-dialog {
+    max-width: 400px;
+}
+#staffSelectionModal .staff-option {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#staffSelectionModal .staff-option:hover {
+    background-color: #f5f5f5;
+}
+/* Thêm vào CSS */
+.modal-open .modal-backdrop {
+  opacity: 0.5 !important;
+}
+
+/* Tùy chọn khác: ẩn hoàn toàn backdrop */
+.modal-backdrop.show {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+/* CSS để fix modal */
+.modal {
+  z-index: 2000 !important;
+}
+.modal-backdrop {
+  opacity: 0.5 !important;
+  pointer-events: auto !important;  /* Cho phép tương tác qua backdrop */
+}
+.modal-open {
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+.modal-open .modal {
+  overflow-y: auto !important;
+  padding-right: 0 !important;
+}
+.modal-content {
+  z-index: 2100 !important;
+  position: relative !important;
+  background-color: white !important;
+  border-radius: 0.3rem !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5) !important;
+}
+.modal .btn-close {
+  z-index: 2101 !important;
+  position: relative !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.modal .btn {
+  position: relative !important;
+  z-index: 2101 !important;
+}
+.modal-dialog {
+  z-index: 2001 !important;
+  position: relative !important;
+}
+body.modal-open {
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+.modal-open .modal-backdrop.show {
+  opacity: 0.3 !important;
+}
+.loading-overlay {
+  z-index: 1800 !important;
+}
+/* Fix giao diện quá rộng */
+.table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.container {
+  max-width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+@media (max-width: 992px) {
+  .table th, .table td {
+    font-size: 0.85rem;
+    padding: 5px 3px;
+  }
+}
+#scheduleTable select.staff-assign-select,
+#scheduleTable input.notes-input {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    min-height: 30px !important;
+    padding: 2px 5px !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    background-color: #fff !important;
+    box-sizing: border-box !important;
+    position: static !important;
+}
+
+/* Đảm bảo nút xóa hiển thị đúng */
+#scheduleTable button.btn-danger {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Fix kích thước các cột trong bảng */
+#scheduleTable th:nth-child(5),
+#scheduleTable td:nth-child(5) {
+    min-width: 150px;
+}
+
+#scheduleTable th:nth-child(6),
+#scheduleTable td:nth-child(6) {
+    min-width: 150px;
+}
+    /* CSS để đảm bảo các thành phần trong bảng lịch làm việc hiển thị đúng */
+    #scheduleTable .staff-assign-select,
+    #scheduleTable .notes-input {
+        display: block !important; 
+        visibility: visible !important;
+        width: 100% !important;
+    }
+    
+    /* Tăng độ ưu tiên CSS */
+    #scheduleTable select.form-select.staff-assign-select {
+        display: block !important;
+        width: 100% !important;
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
+    
+    #scheduleTable input.form-control.notes-input {
+        display: block !important;
+        width: 100% !important;
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* CSS đảm bảo hiển thị tab */
+    /* Đảm bảo hiển thị bảng đúng cách */
+.table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+}
+
+.table thead {
+    display: table-header-group !important;
+}
+
+.table tbody {
+    display: table-row-group !important;
+}
+
+.table tr {
+    display: table-row !important;
+}
+
+.table th, .table td {
+    display: table-cell !important;
+    padding: 0.5rem !important;
+    vertical-align: middle !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Sửa hiển thị của form-control trong bảng */
+.table .form-control, .table .form-select {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Đảm bảo nút trong bảng hiển thị đúng */
+.table button {
+    display: inline-block !important;
+}
+    .tab-pane.active {
+        display: block !important;
+    }
+    #schedule-content.active {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    /* CSS đảm bảo hiển thị tab */
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active.show {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+/* CSS cho tab Lễ tân */
+.reception-cell {
+    padding: 8px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+    height: 80px !important;
+    transition: background-color 0.2s !important;
+}
+    #schedule-content.active.show {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Fix cho Bootstrap Tabs */
+    .nav-tabs .nav-link {
+        cursor: pointer;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #495057;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+
+    /* Đảm bảo các thành phần trong tab được hiển thị đúng */
+    #scheduleTableBody,
+    #scheduleWeekPicker,
+    #scheduleConnectionStatus {
+        display: block;
+    }
+
+    /* Tăng z-index cho tab content để đảm bảo hiển thị trên cùng */
+    .tab-content > .tab-pane.active {
+        z-index: 5;
+        position: relative;
+    }
+    /* CSS để hiển thị bảng đúng */
+#scheduleTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#scheduleTable th, #scheduleTable td {
+    padding: 8px;
+    vertical-align: middle;
+}
+
+/* Đảm bảo các input và select nằm gọn trong ô */
+#scheduleTable select, #scheduleTable input {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* CSS cho cell có nội dung dài */
+#scheduleTable td {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Fix kích thước theo % */
+#scheduleTable th:nth-child(1), #scheduleTable td:nth-child(1) {
+    width: 5%;
+}
+#scheduleTable th:nth-child(2), #scheduleTable td:nth-child(2) {
+    width: 20%;
+}
+#scheduleTable th:nth-child(3), #scheduleTable td:nth-child(3) {
+    width: 15%;
+}
+#scheduleTable th:nth-child(4), #scheduleTable td:nth-child(4) {
+    width: 15%;
+}
+#scheduleTable th:nth-child(5), #scheduleTable td:nth-child(5) {
+    width: 20%;
+}
+#scheduleTable th:nth-child(6), #scheduleTable td:nth-child(6) {
+    width: 20%;
+}
+#scheduleTable th:nth-child(7), #scheduleTable td:nth-child(7) {
+    width: 5%;
+}
+</style>
+
+<script>
+    // ======== KIỂM TRA BIẾN TOÀN CỤC ========
+    if (typeof addDebugMessage !== 'function') {
+        // Định nghĩa các hàm thiết yếu nếu chưa được định nghĩa
+        window.addDebugMessage = function(message) {
+            console.log('[DEBUG] ' + message);
+        };
+    }
+
+    if (typeof showLoading !== 'function') {
+        window.showLoading = function(message) {
+            console.log('[LOADING] ' + message);
+            // Hiển thị thông báo tải nếu có thể
+            try {
+                document.getElementById('loadingMessage').textContent = message;
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            } catch (e) {
+                console.error('Không thể hiển thị loading overlay: ' + e);
+            }
+        };
+    }
+
+    if (typeof hideLoading !== 'function') {
+        window.hideLoading = function() {
+            console.log('[LOADING] Ẩn loading');
+            try {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            } catch (e) {
+                console.error('Không thể ẩn loading overlay: ' + e);
+            }
+        };
+    }
+
+    // ======== BIẾN TOÀN CỤC CHO QUẢN LÝ LỊCH LÀM VIỆC ========
+let scheduleData = []; // Lưu dữ liệu lịch làm việc
+let scheduleStaffList = []; // Lưu danh sách nhân viên cho phân công
+let currentWeekRange = {}; // Lưu thông tin tuần hiện tại
+const USERNAME = 'Admin'; // Tên người dùng mặc định cho phân công
+
+
+window.showScheduleTab = function(forceRender = false) {
+    // UI: Cập nhật các tab
+    window.ordersTab.classList.remove('active');
+    window.scheduleTab.classList.add('active');
+    
+    // Hiển thị content với nhiều biện pháp
+    window.ordersContent.style.display = 'none';
+    window.ordersContent.classList.remove('active', 'show');
+    
+    window.scheduleContent.style.display = 'block';
+    window.scheduleContent.classList.add('active', 'show');
+    
+    // Force render bằng cách sửa đổi DOM
+    if (forceRender) {
+        // 1. Sao chép nội dung
+        const contentClone = window.scheduleContent.cloneNode(true);
+        
+        // 2. Thêm style trực tiếp
+        contentClone.setAttribute("style", 
+            "display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 999 !important; position: relative !important;");
+        
+        // 3. Thay thế phần tử cũ
+        if (window.scheduleContent.parentNode) {
+            window.scheduleContent.parentNode.replaceChild(contentClone, window.scheduleContent);
+            window.scheduleContent = contentClone;
+            console.log('Đã thay thế tab content bằng bản sao để force render');
+        }
+    }
+    
+    console.log('Đã chuyển sang tab Chia Lịch');
+    
+    // Đảm bảo tất cả các phần tử UI hiển thị đúng
+    const allElements = window.scheduleContent.querySelectorAll('div, table, input, button, select');
+    allElements.forEach(function(el) {
+        if (el.style.display === 'none') {
+            el.style.display = '';
+        }
+    });
+    
+    // Khởi tạo tab lịch
+    setTimeout(function() {
+        if (typeof initScheduleManagement === 'function') {
+            try {
+                console.log('Gọi initScheduleManagement sau khi hiển thị tab');
+                // Đặt lại biến khởi tạo để buộc khởi tạo lại
+                window._scheduleInitialized = false;
+                initScheduleManagement();
+            } catch (e) {
+                console.error('Lỗi khởi tạo schedule management:', e);
+            }
+        } else {
+            console.error('FATAL: Hàm initScheduleManagement không tồn tại!');
+        }
+    }, 300);
+};
+    
+    // ======== FUNCTIONS XỬ LÝ LỊCH LÀM VIỆC ========
+function normalizeShift(shift) {
+    // Loại bỏ khoảng trắng thừa và chuyển về chữ thường
+    const normalizedShift = shift.trim().toLowerCase();
+    
+    // Ánh xạ các biến thể ca làm về dạng chuẩn
+    const shiftMapping = {
+        'ca sáng': 'Ca sáng',
+        'ca sang': 'Ca sáng',
+        'ca chiều': 'Ca chiều',
+        'ca chieu': 'Ca chiều',
+        'ca tối': 'Ca tối',
+        'ca toi': 'Ca tối'
+    };
+    
+    return shiftMapping[normalizedShift] || shift;
+}
+
+    // Kiểm tra các sheet cần thiết
+function checkScheduleSheets() {
+    showLoading('Đang kiểm tra các sheet...');
+    addDebugMessage('Đang kiểm tra các sheet cho chia lịch');
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            hideLoading();
+            let message = "Kết quả kiểm tra sheet:\n\n";
+            
+            message += "1. Sheet đăng ký lịch: " + (response.scheduleSheet ? "OK" : "Không tìm thấy") + "\n";
+            message += "2. Sheet danh sách nhân viên: " + (response.staffSheet ? "OK" : "Không tìm thấy") + "\n";
+            message += "3. Sheet phân công: " + (response.assignmentSheet ? "OK" : "Chưa tạo, sẽ tạo khi lưu") + "\n\n";
+            
+            message += "ID Sheet đăng ký: " + response.scheduleSheetId + "\n";
+            message += "ID Sheet nhân viên: " + response.staffSheetId + "\n";
+            message += "ID Sheet phân công: " + response.assignmentSheetId;
+            
+            alert(message);
+            addDebugMessage("Kiểm tra sheet: " + JSON.stringify(response));
+        })
+        .withFailureHandler(function(error) {
+            hideLoading();
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            alert("Lỗi khi kiểm tra sheet: " + errorMessage);
+            addDebugMessage("Lỗi kiểm tra sheet: " + errorMessage);
+        })
+        .checkScheduleSheets();
+}
+
+function loadStaffList(callback) {
+    showLoading('Đang tải danh sách nhân viên...');
+    console.log('Bắt đầu tải danh sách nhân viên');
+    
+    // Đảm bảo luôn có danh sách mặc định
+    scheduleStaffList = ["Nhân viên A", "Nhân viên B", "Nhân viên C"];
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            hideLoading();
+            
+            if (response && response.success && response.data && response.data.length > 0) {
+                // Cập nhật scheduleStaffList cho tab Chia Lịch
+                scheduleStaffList = response.data;
+                console.log('Đã tải ' + scheduleStaffList.length + ' nhân viên từ server');
+                
+                // Cập nhật dropdown trong tab Chia Lịch khi đang ở tab đó
+                updateScheduleDropdowns();
+            } else {
+                console.warn('Không nhận được danh sách nhân viên hoặc danh sách trống, sử dụng danh sách mặc định');
+            }
+            
+            // Gọi callback nếu có
+            if (typeof callback === 'function') {
+                callback();
+            }
+        })
+        .withFailureHandler(function(error) {
+            hideLoading();
+            
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            console.error('Lỗi khi tải danh sách nhân viên:', errorMessage);
+            
+            // Vẫn tiếp tục với danh sách mặc định
+            if (typeof callback === 'function') {
+                callback();
+            }
+        })
+        .getStaffListFromSheet();
+}
+function updateScheduleDropdowns() {
+    try {
+        // Cập nhật dropdown trong giao diện phân công kỹ thuật
+        const scheduleDropdowns = document.querySelectorAll('.staff-assign-select');
+        
+        scheduleDropdowns.forEach(dropdown => {
+            // Lưu lại giá trị đã chọn
+            const selectedValue = dropdown.value;
+            
+            // Xóa tất cả các option hiện tại trừ option đầu tiên
+            while (dropdown.options.length > 1) {
+                dropdown.remove(1);
+            }
+            
+            // Thêm danh sách nhân viên
+            scheduleStaffList.forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff;
+                option.textContent = staff;
+                dropdown.appendChild(option);
+            });
+            
+            // Khôi phục giá trị đã chọn
+            if (selectedValue) {
+                dropdown.value = selectedValue;
+            }
+        });
+        
+        console.log('Đã cập nhật dropdown trong tab Chia lịch');
+    } catch (e) {
+        console.error('Lỗi khi cập nhật dropdown trong tab Chia lịch:', e);
+    }
+}
+// Cập nhật hiển thị tuần hiện tại
+function updateCurrentWeekDisplay() {
+    try {
+        // Lấy ngày hiện tại
+        const today = new Date();
+        const formattedDate = formatDateForDisplay(today);
+        
+        // Thử đặt giá trị trực tiếp trước
+        const weekPickerElement = document.getElementById('scheduleWeekPicker');
+        if (weekPickerElement) {
+            weekPickerElement.value = formattedDate;
+        } else {
+            console.error('Không tìm thấy element scheduleWeekPicker');
+            addDebugMessage('Lỗi: Không tìm thấy element scheduleWeekPicker');
+            return;
+        }
+        
+        const weekRangeElement = document.getElementById('scheduleWeekRange');
+        if (!weekRangeElement) {
+            console.error('Không tìm thấy element scheduleWeekRange');
+            addDebugMessage('Lỗi: Không tìm thấy element scheduleWeekRange');
+            return;
+        }
+        
+        // Gọi server để lấy khoảng tuần
+        google.script.run
+            .withSuccessHandler(function(weekRange) {
+                currentWeekRange = weekRange;
+                weekRangeElement.textContent = `Tuần: ${weekRange.startDate} - ${weekRange.endDate}`;
+                weekPickerElement.value = formattedDate;
+                
+                addDebugMessage(`Đã cập nhật khoảng tuần: ${weekRange.startDate} - ${weekRange.endDate}`);
+            })
+            .withFailureHandler(function(error) {
+                const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                addDebugMessage('Lỗi khi tính khoảng tuần: ' + errorMessage);
+                console.error('Lỗi khi tính khoảng tuần:', error);
+                weekRangeElement.textContent = 'Lỗi tính khoảng tuần';
+            })
+            .getWeekRange(formattedDate);
+    } catch (e) {
+        console.error('Lỗi khi cập nhật thông tin tuần:', e);
+        addDebugMessage('Lỗi khi cập nhật thông tin tuần: ' + e.toString());
+    }
+}
+    
+// Tải lịch làm việc theo tuần đã chọn - Cập nhật
+// Tải lịch làm việc theo tuần đã chọn
+function loadScheduleByWeek() {
+    try {
+        const scheduleWeekPicker = document.getElementById('scheduleWeekPicker');
+        if (!scheduleWeekPicker) {
+            console.error('Không tìm thấy element scheduleWeekPicker');
+            addDebugMessage('Lỗi: Không tìm thấy element scheduleWeekPicker');
+            alert('Không thể tìm thấy trường chọn tuần');
+            return;
+        }
+        
+        const selectedDate = scheduleWeekPicker.value;
+        
+        if (!selectedDate) {
+            alert('Vui lòng chọn một ngày trong tuần');
+            return;
+        }
+        
+        showLoading('Đang tải lịch làm việc...');
+        console.log('Đang tải lịch làm việc cho ngày ' + selectedDate);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Đang tải lịch làm việc cho ngày ' + selectedDate);
+        }
+        
+        // Cập nhật trạng thái
+        const connectionStatusElement = document.getElementById('scheduleConnectionStatus');
+        if (connectionStatusElement) {
+            connectionStatusElement.innerHTML = 
+                '<strong>Đang xử lý!</strong> Đang tính toán khoảng tuần...';
+        }
+        
+        // Đảm bảo danh sách nhân viên đã được tải
+        if (!scheduleStaffList || scheduleStaffList.length === 0) {
+            console.log('Tải danh sách nhân viên trước khi tải lịch làm việc');
+            loadStaffList(function() {
+                // Sau khi tải xong danh sách nhân viên, tiếp tục quá trình tải lịch
+                loadWeekRangeAndSchedule(selectedDate);
+            });
+        } else {
+            // Danh sách nhân viên đã có, tải trực tiếp lịch làm việc
+            loadWeekRangeAndSchedule(selectedDate);
+        }
+    } catch (e) {
+        hideLoading();
+        console.error('Lỗi trong loadScheduleByWeek:', e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Lỗi trong loadScheduleByWeek: ' + e.toString());
+        }
+        alert('Lỗi khi tải dữ liệu theo tuần: ' + e.toString());
+    }
+}
+// Hàm mới để tách logic tải khoảng tuần và lịch làm việc
+// ========== SỬA FILE LICHLAMVIEC.GS.TXT ==========
+
+// Sửa hàm getScheduleData
+function getScheduleData(startDate, endDate, sheetName = 'Kỹ thuật') {
+  try {
+    // ID của Google Sheet chứa dữ liệu đăng ký lịch làm việc
+    const SCHEDULE_SHEET_ID = '1XUedszSYOzuW-jcZPPGCqUUwzuqdpuMFSl6gwWBQEEs';
+    const spreadsheet = SpreadsheetApp.openById(SCHEDULE_SHEET_ID);
+    const sheet = spreadsheet.getSheetByName(sheetName);
+    
+    if (!sheet) {
+      Logger.log(`Không tìm thấy sheet "${sheetName}" trong file đăng ký lịch`);
+      return {
+        success: false,
+        message: `Không tìm thấy sheet "${sheetName}" trong file đăng ký lịch`,
+        data: []
+      };
+    }
+    
+    // Lấy tất cả dữ liệu từ sheet
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    // Ghi log header cho debug
+    Logger.log("Headers sheet " + sheetName + ": " + values[0].join(", "));
+    
+    // Bỏ qua dòng tiêu đề (dòng 1)
+    const data = values.slice(1).map((row, index) => {
+      const rowDate = row[2]; // Ngày đăng ký ở cột C (index 2)
+      let formattedDate = '';
+      
+      // Kiểm tra và định dạng ngày
+      if (rowDate instanceof Date && !isNaN(rowDate)) {
+        const day = String(rowDate.getDate()).padStart(2, '0');
+        const month = String(rowDate.getMonth() + 1).padStart(2, '0');
+        const year = rowDate.getFullYear();
+        formattedDate = `${day}/${month}/${year}`;
+      } else if (typeof rowDate === 'string') {
+        formattedDate = rowDate;
+      }
+      
+      // Trả về đúng cấu trúc dữ liệu theo các cột của sheet
+      return {
+        rowIndex: index + 2, // +2 vì dòng 1 là tiêu đề và index bắt đầu từ 0
+        staffName: row[0] || '', // Tên nhân viên ở cột A
+        staffId: row[1] || '',   // ID ở cột B
+        registerDate: formattedDate, // Ngày đăng ký ở cột C
+        shift: row[3] || '',     // Ca làm việc ở cột D
+        status: row[4] || '',    // Trạng thái ở cột E
+        notes: row[5] || ''      // Ghi chú ở cột F
+      };
+    });
+    
+    // Lọc những ca "Off"
+    let filteredData = data.filter(item => 
+      !(item.shift === 'Off' || 
+        (typeof item.shift === 'string' && item.shift.toLowerCase().includes('off')))
+    );
+    
+    Logger.log(`Đã lọc được ${filteredData.length} bản ghi sau khi loại bỏ ca "Off"`);
+    
+    // Nếu có ngày bắt đầu và kết thúc, lọc dữ liệu theo khoảng thời gian
+    if (startDate && endDate) {
+      const startDateObj = parseDate(startDate);
+      const endDateObj = parseDate(endDate);
+      
+      if (startDateObj && endDateObj) {
+        filteredData = filteredData.filter(item => {
+          const itemDate = parseDate(item.registerDate);
+          return itemDate && itemDate >= startDateObj && itemDate <= endDateObj;
+        });
+      }
+    }
+    
+    Logger.log(`Đã tìm thấy ${filteredData.length} bản ghi lịch làm việc cho ${sheetName}`);
+    
+    return {
+      success: true,
+      message: `Tải thành công ${filteredData.length} bản ghi`,
+      data: filteredData
+    };
+  } catch (error) {
+    Logger.log('Lỗi trong getScheduleData: ' + error.toString());
+    return {
+      success: false,
+      message: 'Lỗi khi tải dữ liệu lịch làm việc: ' + error.toString(),
+      data: []
+    };
+  }
+}
+
+// Thêm hàm kiểm tra kết nối
+function testTechnicianSheetConnection() {
+  try {
+    const SCHEDULE_SHEET_ID = '1XUedszSYOzuW-jcZPPGCqUUwzuqdpuMFSl6gwWBQEEs';
+    const spreadsheet = SpreadsheetApp.openById(SCHEDULE_SHEET_ID);
+    const sheet = spreadsheet.getSheetByName('Kỹ thuật');
+    
+    if (!sheet) {
+      return {
+        success: false,
+        message: 'Không tìm thấy sheet "Kỹ thuật"',
+        availableSheets: spreadsheet.getSheets().map(s => s.getName())
+      };
+    }
+    
+    // Lấy header
+    const headers = sheet.getRange(1, 1, 1, 10).getValues()[0];
+    
+    // Lấy 5 dòng đầu tiên để kiểm tra
+    const sampleData = sheet.getRange(2, 1, 5, 10).getValues();
+    
+    return {
+      success: true,
+      message: 'Kết nối thành công',
+      sheetName: sheet.getName(),
+      headers: headers,
+      sampleData: sampleData
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Lỗi kết nối: ' + error.toString()
+    };
+  }
+}
+
+// ========== SỬA FILE LICHLAMVIECUI.HTML.TXT ==========
+
+// Thêm nút Test Connection trong phần HTML của tab Kỹ thuật
+// Tìm phần này:
+// <button class="btn btn-warning ms-2" id="checkSheetBtn">
+//     <i class="bi bi-file-check"></i> Kiểm Tra Sheet
+// </button>
+
+// Và thêm nút ngay sau đó:
+// <button class="btn btn-info ms-2" id="testConnectionBtn">
+//     <i class="bi bi-database-check"></i> Test Connection
+// </button>
+
+// Sửa hàm loadWeekRangeAndSchedule
+function loadWeekRangeAndSchedule(selectedDate) {
+  // Lấy thông tin khoảng tuần từ server
+  google.script.run
+    .withSuccessHandler(function(weekRange) {
+      // Ghi log để debug
+      console.log("Khoảng tuần nhận được:", weekRange);
+      
+      if (!weekRange || !weekRange.startDate || !weekRange.endDate) {
+        console.error("Dữ liệu khoảng tuần không hợp lệ:", weekRange);
+        hideLoading();
+        alert("Lỗi: Không thể xác định khoảng tuần");
+        return;
+      }
+      
+      currentWeekRange = weekRange;
+      
+      const weekRangeElement = document.getElementById('scheduleWeekRange');
+      if (weekRangeElement) {
+        weekRangeElement.textContent = `Tuần: ${weekRange.startDate} - ${weekRange.endDate}`;
+      }
+      
+      console.log('Đã nhận khoảng tuần:', weekRange);
+      
+      // Sau khi có khoảng tuần, tải dữ liệu lịch làm việc
+      google.script.run
+        .withSuccessHandler(function(response) {
+          hideLoading();
+          
+          // THÊM CODE DEBUG
+          console.log("Phản hồi từ server:", response);
+          
+          // Kiểm tra dữ liệu trả về
+          if (!response) {
+            console.error("Phản hồi từ server là null");
+            alert("Lỗi: Không nhận được dữ liệu từ server");
+            return;
+          }
+          
+          // Cập nhật trạng thái thành công
+          const connectionStatusElement = document.getElementById('scheduleConnectionStatus');
+          if (connectionStatusElement) {
+            connectionStatusElement.innerHTML = 
+              '<strong>Thành công!</strong> Đã tải ' + (response.data?.length || 0) + ' bản ghi lịch làm việc.';
+          }
+          
+          if (response.success && Array.isArray(response.data)) {
+            scheduleData = response.data || [];
+            console.log(`Đã tải ${scheduleData.length} lịch làm việc`);
+            addDebugMessage(`Đã tải ${scheduleData.length} lịch làm việc từ ${weekRange.startDate} đến ${weekRange.endDate}`);
+            
+            // Đảm bảo hiển thị dữ liệu sau khi tất cả đã sẵn sàng
+            displayScheduleData();
+            
+            // Kích hoạt nút lưu nếu có dữ liệu
+            const saveButton = document.getElementById('saveScheduleAssignmentBtn');
+            if (saveButton) {
+              saveButton.disabled = scheduleData.length === 0;
+            }
+          } else {
+            console.error("Dữ liệu không hợp lệ hoặc không thành công:", response);
+            alert('Lỗi khi tải dữ liệu lịch làm việc: ' + (response.message || "Không xác định"));
+            
+            // Hiển thị thông báo không có dữ liệu
+            const noDataMessage = document.getElementById('noScheduleMessage');
+            if (noDataMessage) {
+              noDataMessage.style.display = 'block';
+            }
+            
+            const tableBody = document.getElementById('scheduleTableBody');
+            if (tableBody) {
+              tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Không thể tải dữ liệu</td></tr>';
+            }
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          
+          // Cập nhật trạng thái lỗi
+          const connectionStatusElement = document.getElementById('scheduleConnectionStatus');
+          if (connectionStatusElement) {
+            connectionStatusElement.innerHTML = 
+              '<strong>Lỗi!</strong> Không thể tải dữ liệu lịch làm việc. Lỗi: ' + error;
+          }
+          
+          const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+          console.error('Lỗi khi tải dữ liệu lịch làm việc:', error);
+          addDebugMessage('Lỗi khi tải dữ liệu lịch làm việc: ' + errorMessage);
+          alert('Không thể tải dữ liệu lịch làm việc: ' + errorMessage);
+          
+          // Hiển thị thông báo không có dữ liệu
+          const noDataMessage = document.getElementById('noScheduleMessage');
+          if (noDataMessage) {
+            noDataMessage.style.display = 'block';
+          }
+          
+          const tableBody = document.getElementById('scheduleTableBody');
+          if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Lỗi tải dữ liệu</td></tr>';
+          }
+        })
+        .getScheduleData(weekRange.startDate, weekRange.endDate, 'Kỹ thuật');
+    })
+    .withFailureHandler(function(error) {
+      hideLoading();
+      
+      const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+      console.error('Lỗi khi tính khoảng tuần:', error);
+      addDebugMessage('Lỗi khi tính khoảng tuần: ' + errorMessage);
+      alert('Không thể tính khoảng tuần: ' + errorMessage);
+      
+      // Cập nhật trạng thái lỗi
+      const connectionStatusElement = document.getElementById('scheduleConnectionStatus');
+      if (connectionStatusElement) {
+        connectionStatusElement.innerHTML = 
+          '<strong>Lỗi!</strong> Không thể tính khoảng tuần. Lỗi: ' + errorMessage;
+      }
+    })
+    .getWeekRange(selectedDate);
+}
+
+
+    // Tải dữ liệu lịch làm việc
+    function loadScheduleData(startDate, endDate) {
+        try {
+            // Cập nhật trạng thái
+            const connectionStatusElement = document.getElementById('scheduleConnectionStatus');
+            if (connectionStatusElement) {
+                connectionStatusElement.innerHTML = 
+                    '<strong>Đang tải!</strong> Đang tải dữ liệu lịch làm việc từ ' + startDate + ' đến ' + endDate;
+            }
+            
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    hideLoading();
+                    console.log("Dữ liệu từ server:", response);
+                    // Cập nhật trạng thái thành công
+                    if (connectionStatusElement) {
+                        connectionStatusElement.innerHTML = 
+                            '<strong>Thành công!</strong> Đã tải ' + (response.data?.length || 0) + ' bản ghi lịch làm việc.';
+                    }
+                    
+                    if (response.success) {
+                        scheduleData = response.data || [];
+                        addDebugMessage(`Đã tải ${scheduleData.length} lịch làm việc từ ${startDate} đến ${endDate}`);
+                        displayScheduleData();
+                        
+                        // Kích hoạt nút lưu nếu có dữ liệu
+                        const saveButton = document.getElementById('saveScheduleAssignmentBtn');
+                        if (saveButton) {
+                            saveButton.disabled = scheduleData.length === 0;
+                        }
+                    } else {
+                        alert('Lỗi khi tải dữ liệu lịch làm việc: ' + response.message);
+                        addDebugMessage('Lỗi khi tải dữ liệu lịch làm việc: ' + response.message);
+                        
+                        // Hiển thị thông báo không có dữ liệu
+                        const noDataMessage = document.getElementById('noScheduleMessage');
+                        if (noDataMessage) {
+                            noDataMessage.style.display = 'block';
+                        }
+                        
+                        const tableBody = document.getElementById('scheduleTableBody');
+                        if (tableBody) {
+                            tableBody.innerHTML = '';
+                        }
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideLoading();
+                    
+                    // Cập nhật trạng thái lỗi
+                    if (connectionStatusElement) {
+                        connectionStatusElement.innerHTML = 
+                            '<strong>Lỗi!</strong> Không thể tải dữ liệu lịch làm việc. Lỗi: ' + error;
+                    }
+                    
+                    const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                    addDebugMessage('Lỗi khi tải dữ liệu lịch làm việc: ' + errorMessage);
+                    console.error('Lỗi khi tải dữ liệu lịch làm việc:', error);
+                    alert('Không thể tải dữ liệu lịch làm việc: ' + errorMessage);
+                    
+                    // Hiển thị thông báo không có dữ liệu
+                    const noDataMessage = document.getElementById('noScheduleMessage');
+                    if (noDataMessage) {
+                        noDataMessage.style.display = 'block';
+                    }
+                    
+                    const tableBody = document.getElementById('scheduleTableBody');
+                    if (tableBody) {
+                        tableBody.innerHTML = '';
+                    }
+                })
+                .getScheduleData(startDate, endDate);
+        } catch (e) {
+            hideLoading();
+            console.error('Lỗi trong loadScheduleData:', e);
+            addDebugMessage('Lỗi trong loadScheduleData: ' + e.toString());
+            alert('Lỗi khi tải dữ liệu lịch làm việc: ' + e.toString());
+        }
+    }
+    
+// Hiển thị dữ liệu lịch làm việc lên bảng
+// Hiển thị dữ liệu lịch làm việc lên bảng
+function displayScheduleData() {
+  try {
+    const tableBody = document.getElementById('scheduleTableBody');
+    const noDataMessage = document.getElementById('noScheduleMessage');
+    
+    if (!tableBody) {
+      console.error('Không tìm thấy phần tử scheduleTableBody');
+      addDebugMessage('Lỗi: Không tìm thấy phần tử scheduleTableBody!');
+      return;
+    }
+    
+    if (!noDataMessage) {
+      console.error('Không tìm thấy phần tử noScheduleMessage');
+      addDebugMessage('Lỗi: Không tìm thấy phần tử noScheduleMessage!');
+      // Tiếp tục vì không phải lỗi nghiêm trọng
+    } else {
+      noDataMessage.style.display = 'none';
+    }
+    
+    // Xóa nội dung bảng hiện tại
+    tableBody.innerHTML = '';
+    
+    // Debug dữ liệu
+    console.log("Dữ liệu lịch cần hiển thị:", scheduleData);
+    
+    if (!scheduleData || !Array.isArray(scheduleData) || scheduleData.length === 0) {
+      if (noDataMessage) noDataMessage.style.display = 'block';
+      tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Không có dữ liệu lịch làm việc</td></tr>';
+      return;
+    }
+    
+    // Thêm dữ liệu vào bảng
+    scheduleData.forEach((item, index) => {
+      try {
+        // Kiểm tra dữ liệu item trước khi sử dụng
+        if (!item) {
+          console.error("Bản ghi tại vị trí", index, "là null hoặc undefined");
+          return;
+        }
+        
+        const row = document.createElement('tr');
+        
+        // Cột 1: STT
+        const indexCell = document.createElement('td');
+        indexCell.textContent = index + 1;
+        row.appendChild(indexCell);
+        
+        // Cột 2: Nhân viên đăng ký
+        const staffCell = document.createElement('td');
+        if (item.staffId && item.staffName) {
+          staffCell.textContent = `${item.staffName} (${item.staffId})`;
+        } else {
+          staffCell.textContent = item.staffName || 'N/A';
+        }
+        row.appendChild(staffCell);
+        
+        // Cột 3: Ngày
+        const dateCell = document.createElement('td');
+        dateCell.textContent = item.registerDate || 'N/A';
+        row.appendChild(dateCell);
+        
+        // Cột 4: Ca làm
+        const shiftCell = document.createElement('td');
+        shiftCell.textContent = item.shift || 'N/A';
+        row.appendChild(shiftCell);
+        
+        // Cột 5: Phân công cho - dropdown
+        const assignCell = document.createElement('td');
+        const assignSelect = document.createElement('select');
+        assignSelect.className = 'form-select form-select-sm staff-assign-select';
+        assignSelect.dataset.rowIndex = index;
+        
+        // Thêm option mặc định
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Chọn nhân viên';
+        assignSelect.appendChild(defaultOption);
+        
+        // Thêm danh sách nhân viên
+        if (scheduleStaffList && scheduleStaffList.length > 0) {
+          scheduleStaffList.forEach(staffName => {
+            if (staffName) {
+              const option = document.createElement('option');
+              option.value = staffName;
+              option.textContent = staffName;
+              
+              // Nếu là nhân viên đăng ký, hiển thị mặc định
+              if (staffName === item.staffName) {
+                option.selected = true;
+              }
+              
+              assignSelect.appendChild(option);
+            }
+          });
+        } else {
+          console.warn('Danh sách nhân viên trống');
+          // Thêm một số nhân viên mẫu
+          const sampleStaff = ["Nhân viên A", "Nhân viên B", "Nhân viên C"];
+          sampleStaff.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            assignSelect.appendChild(option);
+          });
+        }
+        
+        assignCell.appendChild(assignSelect);
+        row.appendChild(assignCell);
+        
+        // Cột 6: Ghi chú
+        const notesCell = document.createElement('td');
+        const notesInput = document.createElement('input');
+        notesInput.type = 'text';
+        notesInput.className = 'form-control form-control-sm notes-input';
+        notesInput.dataset.rowIndex = index;
+        notesInput.value = item.notes || '';
+        notesCell.appendChild(notesInput);
+        row.appendChild(notesCell);
+        
+        // Cột 7: Hành động - nút xóa
+        const actionCell = document.createElement('td');
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-sm btn-danger';
+        deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+        deleteBtn.title = 'Xóa';
+        deleteBtn.dataset.rowIndex = index;
+        
+        deleteBtn.addEventListener('click', function() {
+          // Xác nhận trước khi xóa
+          if (confirm('Bạn có chắc chắn muốn xóa lịch làm việc này?')) {
+            try {
+              // Xóa dữ liệu khỏi mảng
+              scheduleData.splice(index, 1);
+              // Cập nhật lại bảng
+              displayScheduleData();
+              console.log('Đã xóa lịch làm việc tại vị trí', index);
+            } catch (e) {
+              console.error('Lỗi khi xóa lịch làm việc:', e);
+              addDebugMessage('Lỗi khi xóa lịch làm việc: ' + e.toString());
+              alert('Lỗi khi xóa lịch làm việc: ' + e.toString());
+            }
+          }
+        });
+        
+        actionCell.appendChild(deleteBtn);
+        row.appendChild(actionCell);
+        
+        // Thêm hàng vào bảng
+        tableBody.appendChild(row);
+      } catch (err) {
+        console.error('Lỗi khi tạo hàng dữ liệu:', err, 'cho item:', item);
+      }
+    });
+    
+    console.log(`Đã hiển thị ${scheduleData.length} bản ghi lịch làm việc`);
+    addDebugMessage(`Đã hiển thị ${scheduleData.length} bản ghi lịch làm việc`);
+  } catch (e) {
+    console.error('Lỗi trong displayScheduleData:', e);
+    addDebugMessage('Lỗi trong displayScheduleData: ' + e.toString());
+    alert('Lỗi khi hiển thị dữ liệu lịch làm việc: ' + e.toString());
+  }
+}
+
+// Lưu phân công lịch làm việc
+function saveScheduleAssignments() {
+    try {
+        // Kiểm tra xem có dữ liệu không
+        if (!scheduleData || scheduleData.length === 0) {
+            alert('Không có dữ liệu lịch làm việc để lưu');
+            return;
+        }
+        
+        // Thu thập dữ liệu từ form
+        const staffAssignSelects = document.querySelectorAll('.staff-assign-select');
+        const notesInputs = document.querySelectorAll('.notes-input');
+        
+        console.log('Số lượng select tìm thấy:', staffAssignSelects.length);
+        console.log('Số lượng input tìm thấy:', notesInputs.length);
+        
+        if (!staffAssignSelects || staffAssignSelects.length === 0) {
+            console.error('Không tìm thấy các phần tử select cần thiết');
+            alert('Không thể tìm thấy các phần tử select cần thiết. Vui lòng thử lại.');
+            return;
+        }
+        
+        // Tạo mảng dữ liệu phân công
+        const assignmentData = [];
+        let hasError = false;
+        
+        staffAssignSelects.forEach((select) => {
+            try {
+                const rowIndex = parseInt(select.getAttribute('data-row-index'));
+                const item = scheduleData[rowIndex];
+                
+                if (item) {
+                    const assignedStaff = select.value;
+                    
+                    // Tìm input tương ứng
+                    let notes = '';
+                    for (const input of notesInputs) {
+                        if (parseInt(input.getAttribute('data-row-index')) === rowIndex) {
+                            notes = input.value || '';
+                            break;
+                        }
+                    }
+                    
+                    // Kiểm tra dữ liệu
+                    if (!assignedStaff) {
+                        hasError = true;
+                        select.classList.add('is-invalid');
+                    } else {
+                        select.classList.remove('is-invalid');
+                        
+                        assignmentData.push({
+                            staffName: assignedStaff,
+                            registerDate: item.registerDate,
+                            shift: item.shift,
+                            assignedBy: USERNAME || 'Admin',
+                            notes: notes
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Lỗi xử lý phần tử khi lưu:', e);
+            }
+        });
+        
+        if (hasError) {
+            alert('Vui lòng chọn nhân viên phân công cho tất cả các ca làm việc');
+            return;
+        }
+        
+        if (assignmentData.length === 0) {
+            alert('Không có dữ liệu phân công để lưu');
+            return;
+        }
+        
+        console.log('Dữ liệu phân công:', assignmentData);
+        
+        showLoading('Đang lưu phân công lịch làm việc...');
+        
+        google.script.run
+            .withSuccessHandler(function(response) {
+                hideLoading();
+                
+                if (response.success) {
+                    alert(response.message);
+                    
+                    // Tải lại dữ liệu
+                    loadScheduleByWeek();
+                } else {
+                    alert('Lỗi khi lưu phân công: ' + response.message);
+                }
+            })
+            .withFailureHandler(function(error) {
+                hideLoading();
+                const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                console.error('Lỗi khi lưu phân công:', error);
+                alert('Không thể lưu phân công: ' + errorMessage);
+            })
+            .saveScheduleAssignment(assignmentData);
+    } catch (e) {
+        hideLoading();
+        console.error('Lỗi trong saveScheduleAssignments:', e);
+        alert('Lỗi khi lưu phân công: ' + e.toString());
+    }
+}
+    
+    // Hàm tiện ích định dạng ngày
+function formatDateForDisplay(date) {
+    try {
+        if (!date || !(date instanceof Date)) return '';
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}/${month}/${year}`;
+    } catch (e) {
+        console.error('Lỗi trong formatDateForDisplay:', e);
+        return '';
+    }
+}
+
+window.initScheduleManagement = function() {
+    console.log('Initializing schedule management');
+    try {
+        // Kiểm tra nếu đã khởi tạo
+        if (window._scheduleInitialized === true) {
+            console.log('Schedule management đã được khởi tạo trước đó');
+            return;
+        }
+        
+        console.log('Bắt đầu khởi tạo quản lý lịch làm việc...');
+        
+        // Khởi tạo các sub-tab
+        const technicianTab = document.getElementById('technician-tab');
+        const receptionTab = document.getElementById('reception-tab');
+        
+        if (technicianTab && receptionTab) {
+            technicianTab.addEventListener('click', function() {
+                // Kích hoạt tab kỹ thuật
+                document.getElementById('technician-content').classList.add('show', 'active');
+                document.getElementById('reception-content').classList.remove('show', 'active');
+                console.log('Đã chuyển sang tab Kỹ thuật');
+                
+                // ĐÃ SỬA: Cập nhật dropdown chỉ trong tab chia lịch
+                if (scheduleStaffList && scheduleStaffList.length > 0) {
+                    updateScheduleDropdowns();
+                }
+            });
+            
+            receptionTab.addEventListener('click', function() {
+                // Kích hoạt tab lễ tân
+                document.getElementById('reception-content').classList.add('show', 'active');
+                document.getElementById('technician-content').classList.remove('show', 'active');
+                
+                // Tải dữ liệu lễ tân nếu cần
+                if (!window._receptionInitialized) {
+                    initReceptionManagement();
+                }
+                console.log('Đã chuyển sang tab Lễ tân');
+            });
+        } else {
+            console.warn('Không tìm thấy các tab Kỹ thuật/Lễ tân');
+        }
+        
+        // Khởi tạo bộ chọn ngày
+        if (typeof flatpickr === 'function') {
+            flatpickr('#scheduleWeekPicker', {
+                dateFormat: "d/m/Y",
+                allowInput: true,
+                locale: {
+                    firstDayOfWeek: 1
+                }
+            });
+            
+            flatpickr('#receptionWeekPicker', {
+                dateFormat: "d/m/Y",
+                allowInput: true,
+                locale: {
+                    firstDayOfWeek: 1
+                }
+            });
+            
+            console.log('Đã khởi tạo flatpickr cho cả hai tab');
+        } else {
+            console.error('flatpickr không được định nghĩa');
+        }
+        
+        // Thêm sự kiện cho các nút trong tab Kỹ thuật
+        const loadBtn = document.getElementById('loadScheduleBtn');
+        if (loadBtn) {
+            loadBtn.addEventListener('click', loadScheduleByWeek);
+            console.log('Đã gắn sự kiện cho nút tải dữ liệu Kỹ thuật');
+        } else {
+            console.error('Không tìm thấy nút loadScheduleBtn');
+        }
+        
+        const checkBtn = document.getElementById('checkSheetBtn');
+        if (checkBtn) {
+            checkBtn.addEventListener('click', checkScheduleSheets);
+            console.log('Đã gắn sự kiện cho nút kiểm tra sheet');
+        } else {
+            console.error('Không tìm thấy nút checkSheetBtn');
+        }
+        // Thêm sự kiện cho nút test connection
+const testConnectionBtn = document.getElementById('testConnectionBtn');
+if (testConnectionBtn) {
+    testConnectionBtn.addEventListener('click', function() {
+        showLoading('Đang kiểm tra kết nối...');
+        console.log('Đang kiểm tra kết nối sheet Kỹ thuật');
+        
+        google.script.run
+            .withSuccessHandler(function(response) {
+                hideLoading();
+                console.log("Kết quả test:", response);
+                
+                let message = "Kết quả kiểm tra:\n\n";
+                
+                if (response.success) {
+                    message += `Sheet: ${response.sheetName || 'Không có thông tin'}\n`;
+                    if (response.headers) {
+                        message += `Headers: ${response.headers.join(', ')}\n\n`;
+                    }
+                    if (response.data && response.data.length > 0) {
+                        message += `Số bản ghi: ${response.data.length}\n`;
+                        message += `Mẫu: ${JSON.stringify(response.data[0])}`;
+                    } else {
+                        message += "Không có dữ liệu mẫu";
+                    }
+                } else {
+                    message += `Lỗi: ${response.message || 'Không xác định'}\n`;
+                    if (response.availableSheets) {
+                        message += `Sheets hiện có: ${response.availableSheets.join(', ')}`;
+                    }
+                }
+                
+                alert(message);
+            })
+            .withFailureHandler(function(error) {
+                hideLoading();
+                console.error('Lỗi kiểm tra kết nối:', error);
+                alert('Lỗi: ' + error.toString());
+            })
+            .testTechnicianSheetConnection();
+    });
+    console.log('Đã gắn sự kiện cho nút Test Connection');
+} else {
+    console.error('Không tìm thấy nút testConnectionBtn');
+}
+        const saveBtn = document.getElementById('saveScheduleAssignmentBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveScheduleAssignments);
+            console.log('Đã gắn sự kiện cho nút lưu phân công Kỹ thuật');
+        } else {
+            console.error('Không tìm thấy nút saveScheduleAssignmentBtn');
+        }
+        const getTechnicianDataBtn = document.getElementById('getTechnicianDataBtn');
+if (getTechnicianDataBtn) {
+    getTechnicianDataBtn.addEventListener('click', function() {
+        // Xác nhận trước khi tải dữ liệu
+        if (confirm('Bạn có muốn tải lịch đăng ký của tất cả nhân viên không?')) {
+            loadScheduleByWeek();
+        }
+    });
+    console.log('Đã gắn sự kiện cho nút Get Data trong tab Kỹ thuật');
+} else {
+    console.error('Không tìm thấy nút getTechnicianDataBtn');
+}
+        // Thêm sự kiện cho các nút trong tab Lễ tân
+const loadReceptionBtn = document.getElementById('loadReceptionBtn');
+if (loadReceptionBtn) {
+    loadReceptionBtn.addEventListener('click', loadReceptionAssignedData);
+    console.log('Đã gắn sự kiện cho nút tải dữ liệu Lễ tân');
+} else {
+    console.error('Không tìm thấy nút loadReceptionBtn');
+}
+        
+        const saveReceptionBtn = document.getElementById('saveReceptionAssignmentBtn');
+        if (saveReceptionBtn) {
+            saveReceptionBtn.addEventListener('click', saveReceptionAssignments);
+            console.log('Đã gắn sự kiện cho nút lưu phân công Lễ tân');
+        } else {
+            console.error('Không tìm thấy nút saveReceptionAssignmentBtn');
+        }
+        
+        // Khởi tạo modal chọn nhân viên
+        try {
+            window.staffSelectionModal = new bootstrap.Modal(document.getElementById('staffSelectionModal'));
+            console.log('Đã khởi tạo modal chọn nhân viên');
+        } catch (error) {
+            console.error('Lỗi khởi tạo modal:', error);
+        }
+        
+        // Thêm sự kiện cho nút xác nhận chọn nhân viên
+        const confirmStaffBtn = document.getElementById('confirmStaffSelection');
+        if (confirmStaffBtn) {
+            confirmStaffBtn.addEventListener('click', confirmStaffSelection);
+            console.log('Đã gắn sự kiện cho nút xác nhận chọn nhân viên');
+        }
+        
+        // Thêm sự kiện tìm kiếm nhân viên
+        const staffSearchInput = document.getElementById('staffSearch');
+        if (staffSearchInput) {
+            staffSearchInput.addEventListener('input', filterAvailableStaff);
+            console.log('Đã gắn sự kiện cho ô tìm kiếm nhân viên');
+        }
+        
+        // Tải danh sách nhân viên và hiển thị tuần hiện tại
+        loadStaffList();
+        updateCurrentWeekDisplay();
+        
+        // Khắc phục lỗi modal backdrop
+        fixModalBackdropIssue();
+        
+        // Đánh dấu đã khởi tạo
+        window._scheduleInitialized = true;
+        console.log('Khởi tạo tab Chia lịch thành công');
+    } catch (e) {
+        console.error('Lỗi khi khởi tạo schedule management:', e);
+        alert('Lỗi khởi tạo quản lý lịch: ' + e.message);
+    }
+};
+// ======== BIẾN TOÀN CỤC CHO QUẢN LÝ LỊCH LỄ TÂN ========
+let receptionScheduleData = []; // Lưu dữ liệu lịch làm việc lễ tân
+let currentReceptionWeekRange = {}; // Lưu thông tin tuần hiện tại cho lễ tân
+let selectedStoreCell = null; // Lưu ô đang được chọn để phân công
+let selectedDate = null; // Ngày được chọn để phân công
+let selectedShift = null; // Ca được chọn để phân công
+let selectedStore = null; // Cửa hàng được chọn để phân công
+let availableStaffList = []; // Danh sách nhân viên có thể phân công
+let receptionStaffList = []; // Danh sách nhân viên lễ tân
+let receptionStaffListCache = null;
+
+
+// Khởi tạo quản lý lịch lễ tân
+function initReceptionManagement() {
+    try {
+        if (window._receptionInitialized === true) {
+            console.log('Reception schedule management đã được khởi tạo trước đó');
+            return;
+        }
+        
+        console.log('Khởi tạo quản lý lịch lễ tân...');
+        
+        // Tải danh sách nhân viên lễ tân
+const getDataBtn = document.getElementById('getReceptionDataBtn');
+if (getDataBtn) {
+    getDataBtn.addEventListener('click', function() {
+        // Xác nhận trước khi tải dữ liệu
+        if (confirm('Bạn có muốn tải lịch đăng ký của tất cả nhân viên không?')) {
+            loadReceptionRegistrationData();
+        }
+    });
+    console.log('Đã gắn sự kiện cho nút Get Data');
+}
+        // Đánh dấu đã khởi tạo
+        window._receptionInitialized = true;
+        console.log('Khởi tạo quản lý lịch lễ tân thành công');
+    } catch (e) {
+        console.error('Lỗi khi khởi tạo reception schedule management:', e);
+        addDebugMessage('Lỗi khi khởi tạo quản lý lịch lễ tân: ' + e.toString());
+    }
+}
+
+// Cập nhật hiển thị tuần hiện tại cho lễ tân
+function updateReceptionWeekDisplay() {
+    try {
+        // Lấy ngày hiện tại
+        const today = new Date();
+        const formattedDate = formatDateForDisplay(today);
+        
+        // Thử đặt giá trị trực tiếp
+        const weekPickerElement = document.getElementById('receptionWeekPicker');
+        if (weekPickerElement) {
+            weekPickerElement.value = formattedDate;
+        } else {
+            console.error('Không tìm thấy element receptionWeekPicker');
+            addDebugMessage('Lỗi: Không tìm thấy element receptionWeekPicker');
+            return;
+        }
+        
+        const weekRangeElement = document.getElementById('receptionWeekRange');
+        if (!weekRangeElement) {
+            console.error('Không tìm thấy element receptionWeekRange');
+            addDebugMessage('Lỗi: Không tìm thấy element receptionWeekRange');
+            return;
+        }
+        
+        // Gọi server để lấy khoảng tuần
+        google.script.run
+            .withSuccessHandler(function(weekRange) {
+                currentReceptionWeekRange = weekRange;
+                weekRangeElement.textContent = `Tuần: ${weekRange.startDate} - ${weekRange.endDate}`;
+                weekPickerElement.value = formattedDate;
+                
+                addDebugMessage(`Đã cập nhật khoảng tuần lễ tân: ${weekRange.startDate} - ${weekRange.endDate}`);
+                
+                // Cập nhật header cho cả hai bảng
+                updateTableHeadersForWeek(weekRange);
+            })
+            .withFailureHandler(function(error) {
+                const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                addDebugMessage('Lỗi khi tính khoảng tuần lễ tân: ' + errorMessage);
+                console.error('Lỗi khi tính khoảng tuần lễ tân:', error);
+                weekRangeElement.textContent = 'Lỗi tính khoảng tuần';
+            })
+            .getWeekRange(formattedDate);
+    } catch (e) {
+        console.error('Lỗi khi cập nhật thông tin tuần lễ tân:', e);
+        addDebugMessage('Lỗi khi cập nhật thông tin tuần lễ tân: ' + e.toString());
+    }
+}
+
+// Cập nhật header cho bảng lịch làm việc
+function updateTableHeadersForWeek(weekRange) {
+    try {
+        // Log khoảng thời gian nhận được
+        console.log('Cập nhật header bảng với khoảng tuần:', weekRange);
+        
+        // Tách ngày bắt đầu tuần
+        const startDateParts = weekRange.startDate.split('/');
+        if (startDateParts.length !== 3) {
+            throw new Error('Định dạng ngày không hợp lệ');
+        }
+        
+        // Tạo đối tượng Date từ ngày bắt đầu tuần
+        const startDate = new Date(
+            parseInt(startDateParts[2]), // Năm
+            parseInt(startDateParts[1]) - 1, // Tháng (0-11)
+            parseInt(startDateParts[0]) // Ngày
+        );
+        
+        console.log('Ngày bắt đầu là:', startDate);
+        
+        // Cập nhật header cho bảng Ba Đình
+        const headerBaDinh = document.getElementById('baDinhTableHeader');
+        if (!headerBaDinh) {
+            console.error('Không tìm thấy header bảng Ba Đình');
+            return;
+        }
+        
+        // Xóa tất cả cột (ngoại trừ cột đầu tiên)
+        while (headerBaDinh.children.length > 1) {
+            headerBaDinh.removeChild(headerBaDinh.lastChild);
+        }
+        
+        // Cập nhật header cho bảng Phan Thanh tương tự
+        const headerPhanThanh = document.getElementById('phanThanhTableHeader');
+        if (!headerPhanThanh) {
+            console.error('Không tìm thấy header bảng Phan Thanh');
+            return;
+        }
+        
+        // Xóa tất cả cột (ngoại trừ cột đầu tiên)
+        while (headerPhanThanh.children.length > 1) {
+            headerPhanThanh.removeChild(headerPhanThanh.lastChild);
+        }
+        
+        // Thêm các cột từ thứ 2 đến chủ nhật cho cả hai bảng
+        const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
+        
+        // Array để lưu các ngày đã thêm vào header (để debug)
+        const addedDates = [];
+        
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const year = currentDate.getFullYear();
+            
+            // Format đầy đủ cho data-date
+            const fullDateStr = `${day}/${month}/${year}`;
+            addedDates.push(fullDateStr);
+            
+            // Format ngắn gọn để hiển thị
+            const displayDateStr = `${day}/${month}`;
+            
+            // Tạo cột cho bảng Ba Đình
+            const thBaDinh = document.createElement('th');
+            thBaDinh.textContent = `${daysOfWeek[i]} (${displayDateStr})`;
+            thBaDinh.className = (i >= 5) ? 'table-weekend' : ''; // Đánh dấu cuối tuần
+            thBaDinh.setAttribute('data-date', fullDateStr);
+            headerBaDinh.appendChild(thBaDinh);
+            
+            // Tạo cột cho bảng Phan Thanh
+            const thPhanThanh = document.createElement('th');
+            thPhanThanh.textContent = `${daysOfWeek[i]} (${displayDateStr})`;
+            thPhanThanh.className = (i >= 5) ? 'table-weekend' : ''; // Đánh dấu cuối tuần
+            thPhanThanh.setAttribute('data-date', fullDateStr);
+            headerPhanThanh.appendChild(thPhanThanh);
+        }
+        
+        console.log('Đã thêm các ngày vào header:', addedDates);
+        
+        // Cập nhật các ô trong bảng
+        updateTableCells('baDinhScheduleTable');
+        updateTableCells('phanThanhScheduleTable');
+        
+        console.log('Đã cập nhật header bảng theo tuần');
+    } catch (e) {
+        console.error('Lỗi khi cập nhật header bảng:', e);
+        addDebugMessage('Lỗi khi cập nhật header bảng: ' + e.toString());
+    }
+}
+
+// Cập nhật các ô trong bảng
+function updateTableCells(tableId) {
+    try {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`Không tìm thấy bảng ${tableId}`);
+            return;
+        }
+        
+        // Lấy số cột từ header
+        const headerRow = table.querySelector('thead tr');
+        const columnCount = headerRow.children.length;
+        
+        // Cập nhật các ô trong mỗi hàng
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row, rowIndex) => {
+            // Lấy tên ca làm từ cột đầu tiên
+            const shiftLabel = row.firstElementChild.textContent.trim();
+            let shiftClass = '';
+            
+            // Xác định class dựa trên ca làm
+            if (shiftLabel === 'Ca sáng') {
+                shiftClass = 'shift-morning';
+            } else if (shiftLabel === 'Ca chiều') {
+                shiftClass = 'shift-afternoon';
+            } else if (shiftLabel === 'Ca tối') {
+                shiftClass = 'shift-evening';
+            }
+            
+            // Xóa tất cả các ô (ngoại trừ ô đầu tiên)
+            while (row.children.length > 1) {
+                row.removeChild(row.lastChild);
+            }
+            
+            // Thêm các ô trống cho mỗi ngày trong tuần
+            for (let i = 1; i < columnCount; i++) {
+                const cell = document.createElement('td');
+                cell.className = `reception-cell ${shiftClass}`;
+                
+                // Lấy ngày từ header
+                const dateStr = headerRow.children[i].getAttribute('data-date');
+                // Lấy tên ca tương ứng
+                const shift = shiftLabel;
+                // Lấy tên cửa hàng từ ID bảng
+                const store = tableId === 'baDinhScheduleTable' ? 'Ba Đình' : 'Phan Thanh';
+                
+                // Đặt thuộc tính data để sử dụng sau này
+                cell.setAttribute('data-date', dateStr);
+                cell.setAttribute('data-shift', shift);
+                cell.setAttribute('data-store', store);
+                
+                // Thêm sự kiện click để chọn nhân viên
+                cell.addEventListener('click', function() {
+    // Nếu có nhân viên được chọn cho phân công nhanh
+    if (window.selectedStaffForQuickAssign) {
+        // Kiểm tra xem ô đã có nhân viên chưa
+        const existingStaff = this.querySelector('.reception-staff');
+        if (existingStaff) {
+            // Nếu đã có nhân viên, hỏi xem có muốn thay thế không
+            if (confirm(`Ô này đã được phân công cho ${existingStaff.textContent}. Bạn có muốn thay thế bằng ${window.selectedStaffForQuickAssign}?`)) {
+                this.innerHTML = '';
+                addStaffToCell(this, window.selectedStaffForQuickAssign);
+                updateStaffOverviewCounts();
+            }
+        } else {
+            // Nếu chưa có nhân viên, phân công luôn
+            addStaffToCell(this, window.selectedStaffForQuickAssign);
+            updateStaffOverviewCounts();
+        }
+    } else {
+        // Nếu không có nhân viên được chọn trước, mở modal chọn nhân viên
+        openStaffSelectionModal(this);
+    }
+});
+                
+                row.appendChild(cell);
+            }
+        });
+        
+        console.log(`Đã cập nhật các ô trong bảng ${tableId}`);
+    } catch (e) {
+        console.error(`Lỗi khi cập nhật các ô trong bảng ${tableId}:`, e);
+        addDebugMessage(`Lỗi khi cập nhật các ô trong bảng ${tableId}: ` + e.toString());
+    }
+}
+function updateStaffOverviewCounts() {
+    try {
+        document.querySelectorAll('.staff-chip').forEach(chip => {
+            const staffName = chip.getAttribute('data-staff');
+            let count = 0;
+            
+            document.querySelectorAll('.reception-staff').forEach(el => {
+                if (el.textContent === staffName) {
+                    count++;
+                }
+            });
+            
+            const badgeEl = chip.querySelector('.badge');
+            if (badgeEl) {
+                badgeEl.textContent = count;
+            }
+        });
+    } catch (e) {
+        console.error('Lỗi khi cập nhật số lượng ca:', e);
+    }
+}
+// Tải lịch làm việc lễ tân theo tuần đã chọn
+function loadReceptionScheduleByWeek() {
+    try {
+        const receptionWeekPicker = document.getElementById('receptionWeekPicker');
+        if (!receptionWeekPicker) {
+            console.error('Không tìm thấy element receptionWeekPicker');
+            addDebugMessage('Lỗi: Không tìm thấy element receptionWeekPicker');
+            alert('Không thể tìm thấy trường chọn tuần');
+            return;
+        }
+        
+        const selectedDate = receptionWeekPicker.value;
+        
+        if (!selectedDate) {
+            alert('Vui lòng chọn một ngày trong tuần');
+            return;
+        }
+        
+        showLoading('Đang tải lịch làm việc lễ tân...');
+        console.log('Đang tải lịch làm việc lễ tân cho ngày ' + selectedDate);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Đang tải lịch làm việc lễ tân cho ngày ' + selectedDate);
+        }
+        
+        // Cập nhật trạng thái
+        const connectionStatusElement = document.getElementById('receptionConnectionStatus');
+        if (connectionStatusElement) {
+            connectionStatusElement.innerHTML = 
+                '<strong>Đang xử lý!</strong> Đang tính toán khoảng tuần...';
+        }
+        
+        // Đảm bảo danh sách nhân viên đã được tải
+        if (!staffList || staffList.length === 0) {
+            console.log('Tải danh sách nhân viên trước khi tải lịch làm việc lễ tân');
+            loadStaffList(function() {
+                // Sau khi tải xong danh sách nhân viên, tiếp tục quá trình tải lịch
+                loadReceptionWeekRangeAndSchedule(selectedDate);
+            });
+        } else {
+            // Danh sách nhân viên đã có, tải trực tiếp lịch làm việc
+            loadReceptionWeekRangeAndSchedule(selectedDate);
+        }
+    } catch (e) {
+        hideLoading();
+        console.error('Lỗi trong loadReceptionScheduleByWeek:', e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Lỗi trong loadReceptionScheduleByWeek: ' + e.toString());
+        }
+        alert('Lỗi khi tải dữ liệu theo tuần: ' + e.toString());
+    }
+}
+
+// Hàm mới để tải dữ liệu đăng ký ban đầu (cho nút Get Data)
+function loadReceptionRegistrationData() {
+    try {
+        const receptionWeekPicker = document.getElementById('receptionWeekPicker');
+        if (!receptionWeekPicker) {
+            console.error('Không tìm thấy element receptionWeekPicker');
+            addDebugMessage('Lỗi: Không tìm thấy element receptionWeekPicker');
+            alert('Không thể tìm thấy trường chọn tuần');
+            return;
+        }
+        
+        const selectedDate = receptionWeekPicker.value;
+        
+        if (!selectedDate) {
+            alert('Vui lòng chọn một ngày trong tuần');
+            return;
+        }
+        
+        showLoading('Đang tải lịch đăng ký nhân viên lễ tân...');
+        console.log('Đang tải lịch đăng ký nhân viên lễ tân cho ngày ' + selectedDate);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Đang tải lịch đăng ký nhân viên lễ tân cho ngày ' + selectedDate);
+        }
+        
+        // Cập nhật trạng thái
+        const connectionStatusElement = document.getElementById('receptionConnectionStatus');
+        if (connectionStatusElement) {
+            connectionStatusElement.innerHTML = 
+                '<strong>Đang xử lý!</strong> Đang tính toán khoảng tuần...';
+        }
+        
+        // Lấy thông tin khoảng tuần từ server
+        google.script.run
+            .withSuccessHandler(function(weekRange) {
+                // Kiểm tra dữ liệu weekRange trước khi sử dụng
+                if (!weekRange) {
+                    console.error('Không nhận được dữ liệu khoảng tuần từ server');
+                    hideLoading();
+                    alert('Không thể tải dữ liệu khoảng tuần. Vui lòng thử lại.');
+                    return;
+                }
+                
+                currentReceptionWeekRange = weekRange;
+                
+                const weekRangeElement = document.getElementById('receptionWeekRange');
+                if (weekRangeElement) {
+                    weekRangeElement.textContent = `Tuần: ${weekRange.startDate} - ${weekRange.endDate}`;
+                }
+                
+                console.log('Đã nhận khoảng tuần cho lễ tân:', weekRange);
+                
+                // Cập nhật header bảng trước
+                updateTableHeadersForWeek(weekRange);
+                
+                // Xóa dữ liệu cũ trước khi tải dữ liệu mới
+                clearAllStaffDisplay();
+                
+                // Tải dữ liệu đăng ký lịch từ sheet Đăng ký lịch
+                google.script.run
+                    .withSuccessHandler(function(registrationResponse) {
+                        hideLoading();
+                        
+                        // Cập nhật trạng thái
+                        const connectionStatusElement = document.getElementById('receptionConnectionStatus');
+                        if (connectionStatusElement) {
+                            connectionStatusElement.innerHTML = 
+                                '<strong>Thành công!</strong> Đã tải dữ liệu đăng ký lịch làm việc.';
+                        }
+                        
+                        // Kiểm tra response trước khi truy cập thuộc tính
+                        const regSuccess = registrationResponse && registrationResponse.success;
+                        // Lưu dữ liệu đăng ký
+                        receptionScheduleData = regSuccess ? registrationResponse.data || [] : [];
+                        
+                        if (receptionScheduleData.length > 0) {
+                            // Hiển thị lịch đăng ký
+                            displayReceptionScheduleData();
+                            
+                            // Cập nhật thống kê
+                            updateScheduleStatistics();
+                            
+                            // Hiển thị danh sách nhân viên có thể phân công
+                            displayStaffOverview();
+                            
+                            // Kích hoạt nút lưu
+                            const saveButton = document.getElementById('saveReceptionAssignmentBtn');
+                            if (saveButton) {
+                                saveButton.disabled = false;
+                            }
+                            
+                            addDebugMessage(`Đã tải và hiển thị ${receptionScheduleData.length} bản ghi đăng ký lịch`);
+                        } else {
+                            alert('Không tìm thấy dữ liệu đăng ký lịch trong khoảng thời gian đã chọn.');
+                            addDebugMessage('Không tìm thấy dữ liệu đăng ký lịch trong khoảng thời gian đã chọn');
+                            
+                            // Hiển thị thông báo không có dữ liệu
+                            const noDataMessage = document.getElementById('noReceptionMessage');
+                            if (noDataMessage) {
+                                noDataMessage.style.display = 'block';
+                            }
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        hideLoading();
+                        const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                        console.error('Lỗi khi tải dữ liệu đăng ký lịch:', error);
+                        alert('Không thể tải dữ liệu đăng ký lịch: ' + errorMessage);
+                    })
+                    .getScheduleData(weekRange.startDate, weekRange.endDate, 'Lễ tân');
+            })
+            .withFailureHandler(function(error) {
+                hideLoading();
+                const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                console.error('Lỗi khi tính khoảng tuần:', error);
+                alert('Không thể tính khoảng tuần: ' + errorMessage);
+            })
+            .getWeekRange(selectedDate);
+    } catch (e) {
+        hideLoading();
+        console.error('Lỗi trong loadReceptionRegistrationData:', e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Lỗi trong loadReceptionRegistrationData: ' + e.toString());
+        }
+        alert('Lỗi khi tải dữ liệu đăng ký lịch: ' + e.toString());
+    }
+}
+
+function loadReceptionAssignedData() {
+  try {
+    const receptionWeekPicker = document.getElementById('receptionWeekPicker');
+    if (!receptionWeekPicker) {
+      console.error('Không tìm thấy element receptionWeekPicker');
+      addDebugMessage('Lỗi: Không tìm thấy element receptionWeekPicker');
+      alert('Không thể tìm thấy trường chọn tuần');
+      return;
+    }
+    
+    const selectedDate = receptionWeekPicker.value;
+    
+    if (!selectedDate) {
+      alert('Vui lòng chọn một ngày trong tuần');
+      return;
+    }
+    
+    showLoading('Đang tải lịch đã phân công...');
+    console.log('Đang tải lịch đã phân công cho ngày ' + selectedDate);
+    addDebugMessage('Đang tải lịch đã phân công cho ngày ' + selectedDate);
+    
+    // Cập nhật trạng thái
+    const connectionStatusElement = document.getElementById('receptionConnectionStatus');
+    if (connectionStatusElement) {
+      connectionStatusElement.innerHTML = 
+        '<strong>Đang xử lý!</strong> Đang tính toán khoảng tuần...';
+    }
+    
+    // Lấy thông tin khoảng tuần từ server
+    google.script.run
+      .withSuccessHandler(function(weekRange) {
+        if (!weekRange) {
+          hideLoading();
+          alert('Không thể tải dữ liệu khoảng tuần. Vui lòng thử lại.');
+          return;
+        }
+        
+        currentReceptionWeekRange = weekRange;
+        
+        const weekRangeElement = document.getElementById('receptionWeekRange');
+        if (weekRangeElement) {
+          weekRangeElement.textContent = `Tuần: ${weekRange.startDate} - ${weekRange.endDate}`;
+        }
+        
+        console.log('Đã nhận khoảng tuần cho lễ tân:', weekRange);
+        addDebugMessage(`Đã nhận khoảng tuần: ${weekRange.startDate} - ${weekRange.endDate}`);
+        
+        // Cập nhật header bảng trước với khoảng tuần đúng
+        updateTableHeadersForWeek(weekRange);
+        
+        // Xóa dữ liệu cũ trước khi tải dữ liệu mới
+        clearAllStaffDisplay();
+        
+        // ĐÃ SỬA: Thêm log để kiểm tra dữ liệu được gửi đi
+        console.log('Gửi yêu cầu dữ liệu từ ' + weekRange.startDate + ' đến ' + weekRange.endDate);
+        addDebugMessage('Gửi yêu cầu dữ liệu từ ' + weekRange.startDate + ' đến ' + weekRange.endDate);
+        
+        // Tải dữ liệu đã phân công từ sheet Chia lịch làm
+        google.script.run
+          .withSuccessHandler(function(assignmentResponse) {
+            hideLoading();
+            
+            // Cập nhật trạng thái
+            if (connectionStatusElement) {
+              connectionStatusElement.innerHTML = 
+                '<strong>Thành công!</strong> Đã tải dữ liệu lịch đã phân công.';
+            }
+            
+            // ĐÃ SỬA: Thêm log để kiểm tra dữ liệu nhận được
+            console.log('Dữ liệu phân công nhận được:', assignmentResponse);
+            
+            const assignSuccess = assignmentResponse && assignmentResponse.success;
+            const assignedData = assignSuccess ? assignmentResponse.data || [] : [];
+            
+            // ĐÃ THÊM: Kiểm tra và hiển thị dữ liệu nhận được theo ngày
+            if (assignedData.length > 0) {
+              console.log('Các ngày trong dữ liệu phân công:');
+              const dateGroups = {};
+              assignedData.forEach(item => {
+                if (!dateGroups[item.registerDate]) {
+                  dateGroups[item.registerDate] = 0;
+                }
+                dateGroups[item.registerDate]++;
+              });
+              console.log(dateGroups);
+              addDebugMessage('Số lượng bản ghi theo ngày: ' + JSON.stringify(dateGroups));
+            }
+            
+            if (assignedData.length > 0) {
+              // Hiển thị lịch đã phân công
+              displayAssignedScheduleData(assignedData);
+              
+              // Cập nhật thống kê
+              updateScheduleStatistics();
+              
+              // Hiển thị danh sách nhân viên có thể phân công
+              displayStaffOverview();
+              
+              // Kích hoạt nút lưu
+              const saveButton = document.getElementById('saveReceptionAssignmentBtn');
+              if (saveButton) {
+                saveButton.disabled = false;
+              }
+              
+              addDebugMessage(`Đã hiển thị ${assignedData.length} bản ghi phân công`);
+            } else {
+              const noDataMessage = document.getElementById('noReceptionMessage');
+              if (noDataMessage) {
+                noDataMessage.style.display = 'block';
+              }
+              addDebugMessage('Không có dữ liệu phân công');
+            }
+          })
+          .withFailureHandler(function(error) {
+            hideLoading();
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            console.error('Lỗi khi tải dữ liệu phân công:', error);
+            addDebugMessage('Lỗi khi tải dữ liệu phân công: ' + errorMessage);
+            alert('Không thể tải dữ liệu lịch đã phân công: ' + errorMessage);
+          })
+          .getAssignedScheduleData(weekRange.startDate, weekRange.endDate, 'Lễ tân');
+      })
+      .withFailureHandler(function(error) {
+        hideLoading();
+        const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+        console.error('Lỗi khi tính khoảng tuần:', error);
+        addDebugMessage('Lỗi khi tính khoảng tuần: ' + errorMessage);
+        alert('Không thể tính khoảng tuần: ' + errorMessage);
+      })
+      .getWeekRange(selectedDate);
+  } catch (e) {
+    hideLoading();
+    console.error('Lỗi trong loadReceptionAssignedData:', e);
+    addDebugMessage('Lỗi trong loadReceptionAssignedData: ' + e.toString());
+    alert('Lỗi khi tải dữ liệu lịch đã phân công: ' + e.toString());
+  }
+}
+// Cập nhật hàm loadReceptionWeekRangeAndSchedule trong file paste-4.txt
+// Tìm hàm này và thay thế toàn bộ nội dung
+function loadReceptionWeekRangeAndSchedule(selectedDate) {
+    // Lấy thông tin khoảng tuần từ server
+    google.script.run
+        .withSuccessHandler(function(weekRange) {
+            // Kiểm tra dữ liệu weekRange trước khi sử dụng
+            if (!weekRange) {
+                console.error('Không nhận được dữ liệu khoảng tuần từ server');
+                hideLoading();
+                alert('Không thể tải dữ liệu khoảng tuần. Vui lòng thử lại.');
+                return;
+            }
+            
+            currentReceptionWeekRange = weekRange;
+            
+            const weekRangeElement = document.getElementById('receptionWeekRange');
+            if (weekRangeElement) {
+                weekRangeElement.textContent = `Tuần: ${weekRange.startDate} - ${weekRange.endDate}`;
+            }
+            
+            console.log('Đã nhận khoảng tuần cho lễ tân:', weekRange);
+            
+            // Cập nhật header bảng trước
+            updateTableHeadersForWeek(weekRange);
+            
+            // 1. Tải dữ liệu đăng ký lịch
+            google.script.run
+                .withSuccessHandler(function(registrationResponse) {
+                    // Kiểm tra response trước khi truy cập thuộc tính
+                    const regSuccess = registrationResponse && registrationResponse.success;
+                    // Lưu dữ liệu đăng ký
+                    receptionScheduleData = regSuccess ? registrationResponse.data || [] : [];
+                    
+                    // 2. Tải dữ liệu đã phân công
+                    google.script.run
+                        .withSuccessHandler(function(assignmentResponse) {
+                            hideLoading();
+                            
+                            // Cập nhật trạng thái
+                            const connectionStatusElement = document.getElementById('receptionConnectionStatus');
+                            if (connectionStatusElement) {
+                                connectionStatusElement.innerHTML = 
+                                    '<strong>Thành công!</strong> Đã tải dữ liệu lịch làm việc và phân công.';
+                            }
+                            
+                            // Kiểm tra response trước khi truy cập thuộc tính
+                            const assignSuccess = assignmentResponse && assignmentResponse.success;
+                            // Kết hợp dữ liệu
+                            const assignedData = assignSuccess ? assignmentResponse.data || [] : [];
+                            
+                            clearAllStaffDisplay();
+                      
+                            // Hiển thị lịch đã phân công
+                            displayAssignedScheduleData(assignedData);
+
+                            // Hiển thị lịch đăng ký (không xóa dữ liệu phân công)
+                            displayReceptionScheduleData();
+
+                            // Cập nhật thống kê
+                            updateScheduleStatistics();
+
+                            // Hiển thị danh sách nhân viên có thể phân công
+                            displayStaffOverview();
+
+                            // Kích hoạt nút lưu
+                            const saveButton = document.getElementById('saveReceptionAssignmentBtn');
+                            if (saveButton) {
+                                saveButton.disabled = false;
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            hideLoading();
+                            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                            console.error('Lỗi khi tải dữ liệu phân công:', error);
+                            alert('Không thể tải dữ liệu phân công: ' + errorMessage);
+                        })
+                        .getAssignedScheduleData(weekRange.startDate, weekRange.endDate, 'Lễ tân');
+                })
+                .withFailureHandler(function(error) {
+                    hideLoading();
+                    const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                    console.error('Lỗi khi tải dữ liệu đăng ký lịch:', error);
+                    alert('Không thể tải dữ liệu đăng ký lịch: ' + errorMessage);
+                })
+                .getScheduleData(weekRange.startDate, weekRange.endDate, 'Lễ tân');
+        })
+        .withFailureHandler(function(error) {
+            hideLoading();
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            console.error('Lỗi khi tính khoảng tuần:', error);
+            alert('Không thể tính khoảng tuần: ' + errorMessage);
+        })
+        .getWeekRange(selectedDate);
+}
+// Hiển thị dữ liệu lịch làm việc lễ tân lên bảng
+function displayReceptionScheduleData() {
+    try {
+        // Ẩn thông báo không có dữ liệu
+        const noDataMessage = document.getElementById('noReceptionMessage');
+        if (noDataMessage) {
+            noDataMessage.style.display = 'none';
+        }
+        
+        // Kiểm tra xem có dữ liệu không
+        if (!receptionScheduleData || receptionScheduleData.length === 0) {
+            if (noDataMessage) {
+                noDataMessage.style.display = 'block';
+            }
+            return;
+        }
+        
+        // Lặp qua từng bản ghi lịch làm việc
+        receptionScheduleData.forEach(item => {
+            if (!item.registerDate || !item.shift || !item.staffName) {
+                return;
+            }
+            
+            // Tách các ca làm việc nếu có nhiều ca trong một dòng
+            const shifts = item.shift.split('|').map(s => s.trim());
+            
+            // Lặp qua từng ca và hiển thị nhân viên vào cả hai cửa hàng
+            shifts.forEach(singleShift => {
+                // Nếu ca làm là "Off", bỏ qua
+                if (singleShift.toLowerCase().includes('off')) {
+                    return;
+                }
+                
+                // Hiển thị vào bảng Ba Đình
+                displayStaffInStore(item.staffName, item.registerDate, singleShift, 'baDinhScheduleTable');
+                
+                // Hiển thị vào bảng Phan Thanh
+                displayStaffInStore(item.staffName, item.registerDate, singleShift, 'phanThanhScheduleTable');
+            });
+        });
+        
+        console.log(`Đã hiển thị ${receptionScheduleData.length} bản ghi lịch làm việc lễ tân`);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage(`Đã hiển thị ${receptionScheduleData.length} bản ghi lịch làm việc lễ tân vào cả hai cửa hàng`);
+        }
+    } catch (e) {
+        console.error('Lỗi trong displayReceptionScheduleData:', e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Lỗi trong displayReceptionScheduleData: ' + e.toString());
+        }
+        alert('Lỗi khi hiển thị dữ liệu lịch làm việc lễ tân: ' + e.toString());
+    }
+}
+// Hàm hiển thị nhân viên vào một cửa hàng cụ thể
+function displayStaffInStore(staffName, registerDate, shift, tableId) {
+    try {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`Không tìm thấy bảng ${tableId}`);
+            return;
+        }
+        
+        // Tìm ô tương ứng với ngày và ca làm việc
+        const rows = table.querySelectorAll('tbody tr');
+        const headerRow = table.querySelector('thead tr');
+        
+        let rowIndex = -1;
+        let colIndex = -1;
+        
+        // Xác định rowIndex dựa vào ca làm việc
+        if (normalizeShift(shift) === 'Ca sáng') {
+            rowIndex = 0;
+        } else if (normalizeShift(shift) === 'Ca chiều') {
+            rowIndex = 1;
+        } else if (normalizeShift(shift) === 'Ca tối') {
+            rowIndex = 2;
+        }
+        
+        if (rowIndex === -1) {
+            console.warn(`Không xác định được hàng cho ca làm việc: ${shift}`);
+            return;
+        }
+        
+        // Xác định colIndex dựa vào ngày
+        for (let i = 1; i < headerRow.children.length; i++) {
+            const headerDateStr = headerRow.children[i].getAttribute('data-date');
+            
+            // So sánh ngày linh hoạt hơn
+            if (isDateMatch(headerDateStr, registerDate)) {
+                colIndex = i;
+                break;
+            }
+        }
+        
+        if (colIndex === -1) {
+            console.warn(`Không xác định được cột cho ngày: ${registerDate}`);
+            return;
+        }
+        
+        // Lấy ô cần cập nhật
+        const cell = rows[rowIndex].children[colIndex];
+        
+        if (!cell) {
+            console.warn(`Không tìm thấy ô tại hàng ${rowIndex}, cột ${colIndex}`);
+            return;
+        }
+        
+        // Thêm nhân viên vào ô
+        addStaffToCell(cell, staffName);
+    } catch (e) {
+        console.error('Lỗi khi hiển thị nhân viên vào cửa hàng:', e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Lỗi khi hiển thị nhân viên vào cửa hàng: ' + e.toString());
+        }
+    }
+}
+
+function isDateMatch(headerDateStr, inputDateStr) {
+  if (!headerDateStr || !inputDateStr) return false;
+  
+  try {
+    // Hàm chuẩn hóa chuỗi ngày thành format DD/MM
+    function normalizeDate(dateStr) {
+      // Loại bỏ mọi ký tự khác ngoài số và dấu "/"
+      const cleaned = dateStr.replace(/[^\d\/]/g, '');
+      const parts = cleaned.split('/');
+      
+      if (parts.length >= 2) {
+        // THÊM MỚI: Thử cả hai cách DD/MM và MM/DD
+        const first = parseInt(parts[0], 10);
+        const second = parseInt(parts[1], 10);
+        
+        // Nếu có thể là mm/dd
+        if (first <= 12 && second <= 31) {
+          // Lấy và chuẩn hóa ngày/tháng
+          const day = parts[0].padStart(2, '0');
+          const month = parts[1].padStart(2, '0');
+          return `${day}/${month}`;
+        }
+        
+        // Thử đảo ngược - nếu có thể là dd/mm
+        if (second <= 12 && first <= 31) {
+          return `${first.toString().padStart(2, '0')}/${second.toString().padStart(2, '0')}`;
+        }
+      }
+      
+      return dateStr;
+    }
+    
+    // Chuẩn hóa cả hai chuỗi ngày
+    const normalizedHeader = normalizeDate(headerDateStr);
+    const normalizedInput = normalizeDate(inputDateStr);
+    
+    // Thử cả hai cách so sánh
+    const directMatch = normalizedHeader === normalizedInput;
+    
+    // Thử đảo ngày và tháng cho normalizedInput
+    const parts = normalizedInput.split('/');
+    let reversedInput = normalizedInput;
+    if (parts.length >= 2) {
+      reversedInput = `${parts[1]}/${parts[0]}`;
+    }
+    const reversedMatch = normalizedHeader === reversedInput;
+    
+    // Debug
+    console.log(`So sánh ngày: ${normalizedHeader} vs ${normalizedInput} (trực tiếp: ${directMatch}, đảo: ${reversedMatch})`);
+    
+    // Trả về true nếu một trong hai cách khớp
+    return directMatch || reversedMatch;
+  } catch (e) {
+    console.error('Lỗi khi so sánh ngày:', e);
+    // Fallback về so sánh chính xác
+    return headerDateStr === inputDateStr;
+  }
+}
+// Xóa tất cả nhân viên đã hiển thị
+function clearAllStaffDisplay() {
+    try {
+        // Xóa tất cả nội dung trong các ô
+        const baDinhCells = document.querySelectorAll('#baDinhScheduleTable .reception-cell');
+        const phanThanhCells = document.querySelectorAll('#phanThanhScheduleTable .reception-cell');
+        
+        baDinhCells.forEach(cell => {
+            cell.innerHTML = '';
+        });
+        
+        phanThanhCells.forEach(cell => {
+            cell.innerHTML = '';
+        });
+        
+        console.log('Đã xóa hiển thị tất cả nhân viên');
+    } catch (e) {
+        console.error('Lỗi khi xóa hiển thị nhân viên:', e);
+        addDebugMessage('Lỗi khi xóa hiển thị nhân viên: ' + e.toString());
+    }
+}
+
+function addStaffToCell(cell, staffName) {
+    try {
+        // Kiểm tra xem cell đã có nhân viên này chưa
+        const existingStaffElements = cell.querySelectorAll('.reception-staff');
+        for (const element of existingStaffElements) {
+            if (element.textContent.replace(' ✕', '').trim() === staffName) {
+                return; // Đã có nhân viên này, không thêm nữa
+            }
+        }
+        
+        // Tạo thẻ span để hiển thị tên nhân viên - LOẠI BỎ STYLE MÀU
+        const staffSpan = document.createElement('span');
+        staffSpan.className = 'reception-staff';
+        staffSpan.textContent = staffName;
+        
+        // Thêm nút xóa nhỏ bên cạnh tên nhân viên
+        const deleteBtn = document.createElement('span');
+        deleteBtn.innerHTML = ' ✕'; // Dấu X
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.style.color = 'red';
+        deleteBtn.style.fontWeight = 'bold';
+        deleteBtn.style.marginLeft = '5px';
+        deleteBtn.title = 'Xóa nhân viên này';
+        deleteBtn.onclick = function(e) {
+            e.stopPropagation(); // Ngăn sự kiện click lan đến cell
+            staffSpan.remove();
+        };
+        
+        staffSpan.appendChild(deleteBtn);
+        
+        // Thêm vào ô
+        cell.appendChild(staffSpan);
+    } catch (e) {
+        console.error('Lỗi khi thêm nhân viên vào ô:', e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage('Lỗi khi thêm nhân viên vào ô: ' + e.toString());
+        }
+    }
+}
+
+// Mở modal chọn nhân viên
+function openStaffSelectionModal(cell) {
+    try {
+        // Lưu ô đang được chọn
+        selectedStoreCell = cell;
+        
+        // Lấy thông tin từ ô được chọn
+        selectedDate = cell.getAttribute('data-date');
+        selectedShift = cell.getAttribute('data-shift');
+        selectedStore = cell.getAttribute('data-store');
+        
+        if (!selectedDate || !selectedShift || !selectedStore) {
+            console.error('Thiếu thông tin cần thiết từ ô được chọn');
+            return;
+        }
+        
+        // Cập nhật thông tin trong modal
+        document.getElementById('modalStore').textContent = selectedStore;
+        document.getElementById('modalDate').textContent = selectedDate;
+        document.getElementById('modalShift').textContent = selectedShift;
+        
+        // Lấy danh sách nhân viên có thể phân công cho ca này
+        getAvailableStaffForShift(selectedDate, selectedShift);
+        
+        // Đảm bảo modal hiển thị đúng
+        const modalElement = document.getElementById('staffSelectionModal');
+        if (modalElement) {
+            // Đặt z-index cao hơn
+            modalElement.style.zIndex = '9999';
+            
+            // Xóa bỏ backdrop cũ nếu có
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                backdrop.style.opacity = '0';
+                backdrop.style.zIndex = '-1';
+                backdrop.style.display = 'none';
+            });
+        }
+        
+        // Hiển thị modal
+        try {
+            if (window.staffSelectionModal) {
+                window.staffSelectionModal.show();
+                
+                // Thêm xử lý để đảm bảo modal hiển thị đúng
+                setTimeout(function() {
+                    // Loại bỏ backdrop một lần nữa sau khi modal mở
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(backdrop => {
+                        backdrop.style.opacity = '0';
+                        backdrop.style.zIndex = '-1';
+                        backdrop.style.display = 'none';
+                    });
+                    
+                    // Đảm bảo modal hiển thị
+                    if (modalElement) {
+                        modalElement.style.display = 'block';
+                        modalElement.style.opacity = '1';
+                        
+                        const modalDialog = modalElement.querySelector('.modal-dialog');
+                        if (modalDialog) {
+                            modalDialog.style.opacity = '1';
+                            modalDialog.style.display = 'block';
+                        }
+                    }
+                }, 50);
+            } else {
+                // Nếu không tìm thấy instance bootstrap Modal, tạo mới
+                const bsModal = new bootstrap.Modal(document.getElementById('staffSelectionModal'));
+                window.staffSelectionModal = bsModal;
+                bsModal.show();
+            }
+        } catch (modalError) {
+            console.error('Lỗi khi hiển thị modal:', modalError);
+            // Thử phương pháp khác để hiển thị modal
+            $('#staffSelectionModal').modal('show');
+        }
+    } catch (e) {
+        console.error('Lỗi khi mở modal chọn nhân viên:', e);
+        addDebugMessage('Lỗi khi mở modal chọn nhân viên: ' + e.toString());
+    }
+}
+
+// Lấy danh sách nhân viên có thể phân công cho ca làm việc
+function getAvailableStaffForShift(date, shift) {
+    try {
+        // Tải danh sách nhân viên lễ tân trước khi hiển thị
+        loadReceptionStaffList(function(staffList) {
+            // Sau khi tải xong, lọc và hiển thị danh sách
+            availableStaffList = staffList;
+            console.log('Danh sách nhân viên lễ tân:', availableStaffList);
+            displayAvailableStaff();
+        });
+    } catch (e) {
+        console.error('Lỗi khi lấy danh sách nhân viên khả dụng:', e);
+        addDebugMessage('Lỗi khi lấy danh sách nhân viên khả dụng: ' + e.toString());
+    }
+}
+
+
+// Hiển thị danh sách nhân viên có thể phân công
+function displayAvailableStaff() {
+    try {
+        const staffListContainer = document.getElementById('availableStaffList');
+        const noStaffMessage = document.getElementById('noAvailableStaff');
+        
+        if (!staffListContainer || !noStaffMessage) {
+            console.error('Không tìm thấy các phần tử hiển thị nhân viên');
+            return;
+        }
+        
+        // Xóa danh sách hiện tại
+        staffListContainer.innerHTML = '';
+        
+        // Kiểm tra xem có nhân viên nào không
+        if (!availableStaffList || availableStaffList.length === 0) {
+            noStaffMessage.style.display = 'block';
+            return;
+        }
+        
+        // Ẩn thông báo không có nhân viên
+        noStaffMessage.style.display = 'none';
+        
+        // Hiển thị từng nhân viên
+        availableStaffList.forEach((staff, index) => {
+            const staffDiv = document.createElement('div');
+            staffDiv.className = 'staff-option';
+            staffDiv.textContent = staff;
+            staffDiv.setAttribute('data-staff', staff);
+            
+            // Đánh dấu nhân viên đã được chọn (nếu có)
+            const selectedStaff = getSelectedStaffFromCell(selectedStoreCell);
+            if (selectedStaff && selectedStaff === staff) {
+                staffDiv.classList.add('selected');
+            }
+            
+            // Thêm sự kiện click để chọn nhân viên
+            staffDiv.addEventListener('click', function() {
+                // Bỏ chọn nhân viên trước đó
+                document.querySelectorAll('.staff-option.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Chọn nhân viên hiện tại
+                this.classList.add('selected');
+                console.log('Đã chọn nhân viên:', this.textContent);
+            });
+            
+            staffListContainer.appendChild(staffDiv);
+        });
+    } catch (e) {
+        console.error('Lỗi khi hiển thị danh sách nhân viên:', e);
+        addDebugMessage('Lỗi khi hiển thị danh sách nhân viên: ' + e.toString());
+    }
+}
+
+// Lấy tên nhân viên đã chọn từ ô
+function getSelectedStaffFromCell(cell) {
+    try {
+        if (!cell) return null;
+        
+        const staffElement = cell.querySelector('.reception-staff');
+        return staffElement ? staffElement.textContent : null;
+    } catch (e) {
+        console.error('Lỗi khi lấy nhân viên từ ô:', e);
+        return null;
+    }
+}
+
+// Lọc danh sách nhân viên theo từ khóa tìm kiếm
+function filterAvailableStaff() {
+    try {
+        const searchInput = document.getElementById('staffSearch');
+        if (!searchInput) return;
+        
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        // Nếu không có từ khóa, hiển thị tất cả
+        if (!searchTerm) {
+            document.querySelectorAll('.staff-option').forEach(option => {
+                option.style.display = 'block';
+            });
+            return;
+        }
+        
+        // Lọc và hiển thị/ẩn từng nhân viên
+        document.querySelectorAll('.staff-option').forEach(option => {
+            const staffName = option.textContent.toLowerCase();
+            if (staffName.includes(searchTerm)) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    } catch (e) {
+        console.error('Lỗi khi lọc danh sách nhân viên:', e);
+        addDebugMessage('Lỗi khi lọc danh sách nhân viên: ' + e.toString());
+    }
+}
+
+// Xác nhận chọn nhân viên
+function confirmStaffSelection() {
+    try {
+        // Lấy nhân viên được chọn
+        const selectedStaffElement = document.querySelector('.staff-option.selected');
+        if (!selectedStaffElement) {
+            alert('Vui lòng chọn một nhân viên');
+            return;
+        }
+        
+        const staffName = selectedStaffElement.getAttribute('data-staff');
+        
+        if (!staffName) {
+            alert('Không thể xác định nhân viên được chọn');
+            return;
+        }
+        
+        // Cập nhật ô hiển thị
+        selectedStoreCell.innerHTML = ''; // Xóa nội dung hiện tại
+        addStaffToCell(selectedStoreCell, staffName);
+        
+        // Đóng modal
+        window.staffSelectionModal.hide();
+        
+        // Kích hoạt nút lưu
+        document.getElementById('saveReceptionAssignmentBtn').disabled = false;
+        
+        console.log(`Đã chọn ${staffName} cho ${selectedStore}, ${selectedDate}, ${selectedShift}`);
+        addDebugMessage(`Đã chọn ${staffName} cho ${selectedStore}, ${selectedDate}, ${selectedShift}`);
+    } catch (e) {
+        console.error('Lỗi khi xác nhận chọn nhân viên:', e);
+        addDebugMessage('Lỗi khi xác nhận chọn nhân viên: ' + e.toString());
+    }
+}
+
+// Lưu phân công lịch làm việc lễ tân
+function saveReceptionAssignments() {
+    try {
+        showLoading('Đang lưu phân công lịch làm việc lễ tân...');
+        
+        // Thu thập dữ liệu từ cả hai bảng
+        const baDinhAssignments = collectAssignmentsFromTable('baDinhScheduleTable', 'Ba Đình')
+            .map(item => ({
+                ...item, 
+                uniqueKey: `${item.registerDate}-${item.shift}-${item.store}`,
+                action: 'upsert' // Hành động thêm mới hoặc cập nhật
+            }));
+        
+        const phanThanhAssignments = collectAssignmentsFromTable('phanThanhScheduleTable', 'Phan Thanh')
+            .map(item => ({
+                ...item, 
+                uniqueKey: `${item.registerDate}-${item.shift}-${item.store}`,
+                action: 'upsert'
+            }));
+        
+        // Kết hợp dữ liệu
+        const assignmentData = [...baDinhAssignments, ...phanThanhAssignments];
+        
+        if (assignmentData.length === 0) {
+            hideLoading();
+            alert('Không có dữ liệu phân công để lưu');
+            return;
+        }
+        
+        console.log('Dữ liệu phân công lễ tân:', assignmentData);
+        
+        // Gọi server để lưu dữ liệu
+        google.script.run
+            .withSuccessHandler(function(response) {
+                hideLoading();
+                
+                if (response.success) {
+                    alert(response.message);
+                    
+                    // Tải lại dữ liệu đã phân công
+                    loadReceptionAssignedData();
+                } else {
+                    alert('Lỗi khi lưu phân công: ' + response.message);
+                }
+            })
+            .withFailureHandler(function(error) {
+                hideLoading();
+                const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+                console.error('Lỗi khi lưu phân công lễ tân:', error);
+                alert('Không thể lưu phân công lễ tân: ' + errorMessage);
+            })
+            .saveScheduleAssignment(assignmentData, 'Lễ tân');
+    } catch (e) {
+        hideLoading();
+        console.error('Lỗi trong saveReceptionAssignments:', e);
+        alert('Lỗi khi lưu phân công lễ tân: ' + e.toString());
+    }
+}
+
+// Thu thập dữ liệu phân công từ bảng
+function collectAssignmentsFromTable(tableId, storeName) {
+    try {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`Không tìm thấy bảng ${tableId}`);
+            return [];
+        }
+        
+        const assignments = [];
+        
+        // Lấy tất cả các ô trong bảng
+        const rows = table.querySelectorAll('tbody tr');
+        const headerRow = table.querySelector('thead tr');
+        
+        // Duyệt qua từng ô trong bảng
+        rows.forEach((row, rowIndex) => {
+            // Xác định ca làm việc dựa vào rowIndex
+            let shift = '';
+            if (rowIndex === 0) shift = normalizeShift('Ca sáng');
+            else if (rowIndex === 1) shift = normalizeShift('Ca chiều');
+            else if (rowIndex === 2) shift = normalizeShift('Ca tối');
+            else return; // Bỏ qua các hàng không phải ca làm việc
+            
+            // Duyệt qua các cột (từ cột 1, bỏ qua cột 0 là tiêu đề ca làm)
+            for (let colIndex = 1; colIndex < row.children.length; colIndex++) {
+                const cell = row.children[colIndex];
+                const date = headerRow.children[colIndex].getAttribute('data-date');
+                
+                // Lấy tất cả nhân viên trong ô
+                const staffElements = cell.querySelectorAll('.reception-staff');
+                
+                // Nếu có nhân viên trong ô này
+                staffElements.forEach(staffElement => {
+                    // Loại bỏ nút xóa khỏi tên nhân viên
+                    const staffName = staffElement.textContent.replace(' ✕', '').trim();
+                    
+                    // Thêm vào danh sách phân công
+                    assignments.push({
+                        staffName: staffName,
+                        registerDate: date,
+                        shift: shift,
+                        store: storeName,
+                        assignedBy: USERNAME || 'Admin',
+                        notes: ''
+                    });
+                });
+            }
+        });
+        
+        return assignments;
+    } catch (e) {
+        console.error(`Lỗi khi thu thập dữ liệu từ bảng ${tableId}:`, e);
+        if (typeof addDebugMessage === 'function') {
+            addDebugMessage(`Lỗi khi thu thập dữ liệu từ bảng ${tableId}: ` + e.toString());
+        }
+        return [];
+    }
+}
+// Khắc phục lỗi modal backdrop
+function fixModalBackdropIssue() {
+    // Xử lý khi modal được mở
+    document.addEventListener('show.bs.modal', function(event) {
+        // Loại bỏ backdrop
+        setTimeout(function() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                backdrop.style.opacity = '0';
+                backdrop.style.zIndex = '-1';
+            });
+            
+            // Đảm bảo modal hiển thị
+            const modal = event.target;
+            modal.style.display = 'block';
+            modal.style.opacity = '1';
+            modal.style.zIndex = '9999';
+            
+            const modalDialog = modal.querySelector('.modal-dialog');
+            if (modalDialog) {
+                modalDialog.style.zIndex = '10000';
+                modalDialog.style.opacity = '1';
+                modalDialog.style.display = 'block';
+            }
+            
+            console.log('Đã xử lý modal backdrop khi mở modal');
+        }, 10);
+    });
+    
+    console.log('Đã đăng ký xử lý modal backdrop');
+}
+// Tạo mới function loadReceptionStaffList trong file lichlamviecui.html.txt
+function loadReceptionStaffList(callback) {
+    // Nếu đã có cache, trả về ngay lập tức
+    if (receptionStaffListCache) {
+        console.log('Sử dụng danh sách nhân viên lễ tân từ cache');
+        if (typeof callback === 'function') {
+            callback(receptionStaffListCache);
+        }
+        return;
+    }
+
+    showLoading('Đang tải danh sách nhân viên lễ tân...');
+    console.log('Bắt đầu tải danh sách nhân viên lễ tân');
+    
+    // Danh sách mặc định
+    const defaultStaffList = ["Lễ tân A", "Lễ tân B", "Lễ tân C"];
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            hideLoading();
+            
+            if (response && response.success && response.data && response.data.length > 0) {
+                // Lưu vào cache
+                receptionStaffListCache = response.data;
+                console.log('Đã tải ' + receptionStaffListCache.length + ' nhân viên lễ tân từ server');
+            } else {
+                // Sử dụng danh sách mặc định
+                receptionStaffListCache = defaultStaffList;
+                console.warn('Không nhận được danh sách nhân viên lễ tân, sử dụng danh sách mặc định');
+            }
+            
+            // Gọi callback
+            if (typeof callback === 'function') {
+                callback(receptionStaffListCache);
+            }
+        })
+        .withFailureHandler(function(error) {
+            hideLoading();
+            
+            // Sử dụng danh sách mặc định khi lỗi
+            receptionStaffListCache = defaultStaffList;
+            
+            const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error.toString();
+            console.error('Lỗi khi tải danh sách nhân viên lễ tân:', errorMessage);
+            
+            // Gọi callback với danh sách mặc định
+            if (typeof callback === 'function') {
+                callback(receptionStaffListCache);
+            }
+        })
+        .getReceptionStaffList(); 
+}
+
+// Hiển thị dữ liệu lịch đã phân công
+function displayAssignedScheduleData(assignedData) {
+    try {
+        // Debug: In ra định dạng ngày trong header và dữ liệu
+        const baDinhHeader = document.querySelector('#baDinhScheduleTable thead tr');
+if (baDinhHeader) {
+  const headerDates = [];
+  for (let i = 1; i < baDinhHeader.children.length; i++) {
+    headerDates.push(baDinhHeader.children[i].getAttribute('data-date'));
+  }
+  console.log('Định dạng ngày trong header:', headerDates);
+  addDebugMessage('Định dạng ngày trong header: ' + JSON.stringify(headerDates));
+
+  // Hiển thị định dạng ngày trong dữ liệu
+  const dataDates = assignedData.map(item => item.registerDate);
+  const uniqueDates = [...new Set(dataDates)];
+  console.log('Định dạng ngày trong dữ liệu:', uniqueDates);
+  addDebugMessage('Định dạng ngày trong dữ liệu: ' + JSON.stringify(uniqueDates));
+}
+
+// Tạo bảng tra cứu nhanh các ô
+const cellMap = {};
+document.querySelectorAll('#baDinhScheduleTable .reception-cell, #phanThanhScheduleTable .reception-cell').forEach(cell => {
+  const date = cell.getAttribute('data-date');
+  const shift = cell.getAttribute('data-shift');
+  const store = cell.getAttribute('data-store');
+  
+  if (date && shift && store) {
+    const key = `${date}-${shift}-${store}`;
+    cellMap[key] = cell;
+  }
+});
+console.log('Tạo bảng tra cứu ô:', Object.keys(cellMap).length);
+
+        assignedData.forEach(item => {
+            try {
+                if (!item.registerDate || !item.shift || !item.staffName || !item.store) {
+                    return;
+                }
+                
+                // Xác định bảng cần cập nhật
+                const tableId = item.store.includes('Ba Đình') ? 'baDinhScheduleTable' : 'phanThanhScheduleTable';
+                const table = document.getElementById(tableId);
+                
+                if (!table) {
+                    console.error(`Không tìm thấy bảng ${tableId}`);
+                    return;
+                }
+                
+                // Tìm ô tương ứng với ngày và ca làm việc
+                const rows = table.querySelectorAll('tbody tr');
+                const headerRow = table.querySelector('thead tr');
+                
+                if (!headerRow) {
+                    console.error(`Không tìm thấy headerRow trong bảng ${tableId}`);
+                    return;
+                }
+                
+                let rowIndex = -1;
+                let colIndex = -1;
+                
+                // Xác định rowIndex dựa vào ca làm việc
+                if (normalizeShift(item.shift).includes('Ca sáng')) {
+                    rowIndex = 0;
+                } else if (normalizeShift(item.shift).includes('Ca chiều')) {
+                    rowIndex = 1;
+                } else if (normalizeShift(item.shift).includes('Ca tối')) {
+                    rowIndex = 2;
+                }
+                
+                if (rowIndex === -1) {
+                    console.warn(`Không xác định được hàng cho ca làm việc: ${item.shift}`);
+                    return;
+                }
+                
+                // Xác định colIndex dựa vào ngày - Sử dụng hàm isDateMatch
+                for (let i = 1; i < headerRow.children.length; i++) {
+                    const dateStr = headerRow.children[i].getAttribute('data-date');
+                    if (isDateMatch(dateStr, item.registerDate)) {
+                        colIndex = i;
+                        break;
+                    }
+                }
+                
+                if (colIndex === -1) {
+                    console.warn(`Không xác định được cột cho ngày: ${item.registerDate}`);
+                    return;
+                }
+                
+                // Đảm bảo hàng tồn tại
+                if (!rows[rowIndex]) {
+                    console.error(`Không tìm thấy hàng tại rowIndex ${rowIndex}`);
+                    return;
+                }
+                
+                // Đảm bảo cột tồn tại trong hàng đó
+                if (!rows[rowIndex].children[colIndex]) {
+                    console.error(`Không tìm thấy cột ${colIndex} trong hàng ${rowIndex}`);
+                    return;
+                }
+                
+                const cell = rows[rowIndex].children[colIndex];
+                
+                // Tạo thẻ span hiển thị tên nhân viên
+                const staffSpan = document.createElement('span');
+                staffSpan.className = 'reception-staff';
+                staffSpan.textContent = item.staffName;
+                staffSpan.title = `Phân công bởi: ${item.assignedBy || 'Admin'}\nGhi chú: ${item.notes || 'Không có'}`;
+                
+                // Thêm nút xóa nhỏ bên cạnh tên nhân viên
+                const deleteBtn = document.createElement('span');
+                deleteBtn.innerHTML = ' ✕'; // Dấu X
+                deleteBtn.style.cursor = 'pointer';
+                deleteBtn.style.color = 'red';
+                deleteBtn.style.fontWeight = 'bold';
+                deleteBtn.style.marginLeft = '5px';
+                deleteBtn.title = 'Xóa nhân viên này';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation(); // Ngăn sự kiện click lan đến cell
+                    staffSpan.remove();
+                };
+                
+                staffSpan.appendChild(deleteBtn);
+                
+                cell.innerHTML = ''; // Xóa nội dung hiện tại
+                cell.appendChild(staffSpan);
+            } catch (itemError) {
+                console.error('Lỗi xử lý item:', itemError, item);
+            }
+        });
+        
+        console.log(`Đã hiển thị ${assignedData.length} phân công lịch làm việc`);
+    } catch (error) {
+        console.error('Lỗi trong displayAssignedScheduleData:', error);
+    }
+}
+// Hiển thị tổng quan nhân viên có thể phân công
+// Hiển thị tổng quan nhân viên có thể phân công
+function displayStaffOverview() {
+    try {
+        const container = document.getElementById('availableStaffOverview');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Đảm bảo receptionStaffList đã được tải
+        if (!receptionStaffList || receptionStaffList.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center">Không có dữ liệu nhân viên</div>';
+            return;
+        }
+        
+        // Tạo chip cho mỗi nhân viên
+        receptionStaffList.forEach(staff => {
+            const staffChip = document.createElement('div');
+            staffChip.className = 'staff-chip';
+            staffChip.innerHTML = `${staff} <span class="badge bg-secondary">0</span>`;
+            staffChip.setAttribute('data-staff', staff);
+            
+            // Tính số lượng ca đã phân công
+            let assignmentCount = 0;
+            document.querySelectorAll('.reception-staff').forEach(el => {
+                if (el.textContent === staff) {
+                    assignmentCount++;
+                }
+            });
+            
+            // Cập nhật số lượng
+            staffChip.querySelector('.badge').textContent = assignmentCount;
+            
+            // Thêm sự kiện click để chọn nhanh nhân viên
+            staffChip.addEventListener('click', function() {
+                // Lưu nhân viên đang chọn để phân công nhanh
+                window.selectedStaffForQuickAssign = staff;
+                
+                // Cập nhật trạng thái active
+                document.querySelectorAll('.staff-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                alert(`Đã chọn ${staff} để phân công nhanh. Nhấp vào ô lịch để phân công.`);
+            });
+            
+            container.appendChild(staffChip);
+        });
+    } catch (e) {
+        console.error('Lỗi khi hiển thị tổng quan nhân viên:', e);
+    }
+}
+// Thêm hàm khởi tạo drag-and-drop
+function initializeDragAndDrop() {
+    // Tạo kéo thả từ danh sách nhân viên
+    const staffOverview = document.getElementById('availableStaffOverview');
+    if (staffOverview) {
+        Sortable.create(staffOverview, {
+            group: {
+                name: 'staff',
+                pull: 'clone',
+                put: false
+            },
+            sort: false,
+            animation: 150,
+            onEnd: function(evt) {
+                // Khi thả vào ô lịch
+                if (evt.to !== staffOverview) {
+                    const staffName = evt.item.getAttribute('data-staff');
+                    const targetCell = evt.to;
+                    
+                    // Xóa bản sao từ drag-and-drop
+                    if (evt.item.parentNode) {
+                        evt.item.parentNode.removeChild(evt.item);
+                    }
+                    
+                    // Thêm nhân viên vào ô
+                    addStaffToCell(targetCell, staffName);
+                    updateStaffOverviewCounts();
+                }
+            }
+        });
+    }
+    
+    // Cho phép thả vào các ô lịch
+    document.querySelectorAll('.reception-cell').forEach(cell => {
+        Sortable.create(cell, {
+            group: {
+                name: 'staff',
+                pull: false,
+                put: true
+            },
+            sort: false,
+            animation: 150
+        });
+    });
+}
+
+// Gọi trong hàm initReceptionManagement()
+// ...sau khi updateReceptionWeekDisplay();
+initializeDragAndDrop();
+// Thêm hàm cập nhật thống kê
+function updateScheduleStatistics() {
+    // Tổng số đăng ký
+    const totalRegistrations = receptionScheduleData.length;
+    document.getElementById('totalRegistrations').textContent = totalRegistrations;
+    
+    // Tổng số đã phân công
+    const totalAssigned = document.querySelectorAll('.reception-staff').length;
+    document.getElementById('totalAssigned').textContent = totalAssigned;
+    
+    // Tổng số chưa phân công
+    const totalUnassigned = totalRegistrations - totalAssigned;
+    document.getElementById('totalUnassigned').textContent = totalUnassigned;
+}
+
+// Gọi hàm này sau khi hiển thị dữ liệu
+// Trong hàm loadReceptionWeekRangeAndSchedule sau khi hiển thị dữ liệu:
+// ...
+displayAssignedScheduleData(assignedData);
+displayReceptionScheduleData();
+updateScheduleStatistics();
+// ...
+</script>
